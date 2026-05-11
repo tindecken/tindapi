@@ -21,6 +21,8 @@
 		"wrangler": "^4.90.0"
 	},
 	"dependencies": {
+		"@hono/typebox-validator": "^1.1.0",
+		"googleapis": "^171.4.0",
 		"hono": "^4.12.18"
 	}
 }

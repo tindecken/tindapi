@@ -1,5 +1,21 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
+import { getAllTransactions } from "./routes/spreadsheet/getAllTransactions";
+import { lastTransaction } from "./routes/spreadsheet/lastTransaction";
+import { nhiRemaining } from "./routes/spreadsheet/nhiRemaining";
+import { addTransaction } from "./routes/spreadsheet/addTransaction";
+import { perDay } from "./routes/spreadsheet/perDay";
+import { undoTransaction } from "./routes/spreadsheet/undoTransaction";
+import { getMustPay } from "./routes/spreadsheet/getMustPay";
+import { getHoangRemaining } from "./routes/spreadsheet/getHoangRemaining";
+import { addTransactionForMustPay } from "./routes/spreadsheet/addTransactionForMustPay";
+import { cashWithdrawal } from "./routes/spreadsheet/cashWithdrawal";
+import { getNhiTransactions } from "./routes/spreadsheet/getNhiTransactions";
+import { reconcilliation } from "./routes/spreadsheet/reconcilliation";
+import { giveNhi } from "./routes/spreadsheet/giveNhi";
+import { getCurrentAmounts } from "./routes/spreadsheet/getCurrentAmounts";
+
+
 const app = new Hono<{ Bindings: Env }>();
 
 app.use("*", cors({
@@ -16,8 +32,23 @@ app.get('/', (c) => {
 	return c.json({
 		message: 'Hello from tindapi!',
 		environment: env,
-		SECRET_API_KEY: c.env.SECRET_API_KEY
+		CURRENT_ENVIRONMENT: c.env.CURRENT_ENVIRONMENT
 	});
 });
+
+app.route("/spreadsheet", addTransaction);
+app.route("/spreadsheet", addTransactionForMustPay);
+app.route("/spreadsheet", getAllTransactions);
+app.route("/spreadsheet", lastTransaction);
+app.route("/spreadsheet", nhiRemaining);
+app.route("/spreadsheet", getHoangRemaining);
+app.route("/spreadsheet", perDay);
+app.route("/spreadsheet", undoTransaction);
+app.route("/spreadsheet", getMustPay);
+app.route("/spreadsheet", cashWithdrawal);
+app.route("/spreadsheet", getNhiTransactions);
+app.route("/spreadsheet", reconcilliation);
+app.route("/spreadsheet", giveNhi);
+app.route("/spreadsheet", getCurrentAmounts);
 
 export default app;
