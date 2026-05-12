@@ -15,6 +15,7 @@ import { reconcilliation } from "./routes/spreadsheet/reconcilliation";
 import { giveNhi } from "./routes/spreadsheet/giveNhi";
 import { getCurrentAmounts } from "./routes/spreadsheet/getCurrentAmounts";
 import { getEnvironmentVars } from "./routes/spreadsheet/getEnvironmentVars";
+import { addLog } from "./routes/database/addLog";
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -49,5 +50,6 @@ app.route("/spreadsheet", reconcilliation);
 app.route("/spreadsheet", giveNhi);
 app.route("/spreadsheet", getCurrentAmounts);
 app.route("/spreadsheet", getEnvironmentVars);
+app.route("/database", addLog);
 
 export default app;
