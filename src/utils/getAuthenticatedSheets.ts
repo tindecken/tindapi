@@ -7,7 +7,7 @@ import { JWT } from 'google-auth-library';
 async function getAuthenticatedSheets(env?: Env): Promise<sheets_v4.Sheets> {
   // Use process.env for local dev, or pass an 'env' object for Workers
   const clientEmail = env?.GCP_SERVICE_ACCOUNT_EMAIL ?? process.env.GCP_SERVICE_ACCOUNT_EMAIL;
-  let privateKey = env?.GCP_PRIVATE_KEY ?? process.env.GCP_PRIVATE_KEY; // Fixes newline formatting
+  let privateKey = env?.GCP_PRIVATE_KEY ?? process.env.GCP_PRIVATE_KEY;
 
   if (!clientEmail || !privateKey) {
     throw new Error("Missing Google Service Account credentials in environment variables.");

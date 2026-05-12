@@ -14,7 +14,7 @@ import { getNhiTransactions } from "./routes/spreadsheet/getNhiTransactions";
 import { reconcilliation } from "./routes/spreadsheet/reconcilliation";
 import { giveNhi } from "./routes/spreadsheet/giveNhi";
 import { getCurrentAmounts } from "./routes/spreadsheet/getCurrentAmounts";
-
+import { getEnvironmentVars } from "./routes/spreadsheet/getEnvironmentVars";
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -28,11 +28,9 @@ app.use("*", cors({
 }))
 
 app.get('/', (c) => {
-	const env = c.env.ENVIRONMENT || 'unknown';
 	return c.json({
 		message: 'Hello from tindapi!',
-		environment: env,
-		CURRENT_ENVIRONMENT: c.env.CURRENT_ENVIRONMENT
+		environment: c.env.ENVIRONMENT,
 	});
 });
 
@@ -50,5 +48,6 @@ app.route("/spreadsheet", getNhiTransactions);
 app.route("/spreadsheet", reconcilliation);
 app.route("/spreadsheet", giveNhi);
 app.route("/spreadsheet", getCurrentAmounts);
+app.route("/spreadsheet", getEnvironmentVars);
 
 export default app;

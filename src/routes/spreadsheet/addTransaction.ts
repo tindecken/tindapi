@@ -8,7 +8,7 @@ import Type from 'typebox'
 import type { GenericResponseInterface } from '../../models/GenericResponseInterface';
 import getFirstSheet from "../../utils/getFirstSheet";
 
-export const addTransaction = new Hono();
+export const addTransaction = new Hono<{ Bindings: Env }>();
 
 // ID of your target spreadsheet (the long ID from the URL)
 const SPREADSHEET_ID = process.env.SPREADSHEET_ID;
