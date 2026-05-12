@@ -1,23 +1,29 @@
-import { google, sheets_v4, Auth } from 'googleapis';
-import * as path from "path";
+import { google, sheets_v4 } from 'googleapis';
+import { JWT } from 'google-auth-library';
 
-// src/utils/getAuthenticatedSheets.ts
-// Path to your service account key file
-const GOOGLE_APPLICATION_CREDENTIALS = process.env.GOOGLE_APPLICATION_CREDENTIALS;
+/**
+ * Works locally with process.env or in Workers with env bindings
+ */
+async function getAuthenticatedSheets(env?: Env): Promise<sheets_v4.Sheets> {
+  // Use process.env for local dev, or pass an 'env' object for Workers
+  const clientEmail = env?.GCP_SERVICE_ACCOUNT_EMAIL ?? process.env.GCP_SERVICE_ACCOUNT_EMAIL;
+  let privateKey = env?.GCP_PRIVATE_KEY ?? process.env.GCP_PRIVATE_KEY; // Fixes newline formatting
 
-if (!GOOGLE_APPLICATION_CREDENTIALS) {
-    throw new Error('GOOGLE_APPLICATION_CREDENTIALS environment variable is not defined');
+  if (!clientEmail || !privateKey) {
+    throw new Error("Missing Google Service Account credentials in environment variables.");
+  }
+
+  const authClient = new JWT({
+    email: clientEmail,
+    key: privateKey,
+    scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+  });
+
+  return google.sheets({
+    version: 'v4',
+    auth: authClient
+  });
 }
 
-const SERVICE_ACCOUNT_FILE = path.join(__dirname, "..", "..", GOOGLE_APPLICATION_CREDENTIALS);
+export default getAuthenticatedSheets;
 
-export default async function getAuthenticatedSheets(): Promise<sheets_v4.Sheets> {
-    const auth: Auth.GoogleAuth = new google.auth.GoogleAuth({
-      keyFile: SERVICE_ACCOUNT_FILE,
-      scopes: ["https://www.googleapis.com/auth/spreadsheets"],
-    });
-
-    // Create Sheets API instance with authenticated client
-    const sheets = google.sheets({ version: "v4", auth });
-    return sheets;
-}
