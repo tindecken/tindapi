@@ -5,21 +5,29 @@ import type { GenericResponseInterface } from '../../models/GenericResponseInter
 import { dbClient } from '../../../drizzle_supabase/db/dbclient';
 import { posts, secrets, configures } from '../../../drizzle_supabase/migrations/schema';
 import { eq, and, gt, lt, sql } from "drizzle-orm";
+import { getSupabaseStorageClient } from '../../utils/supabaseStorage';
 
 export const createPost = new Hono<{ Bindings: Env }>();
 
+const attachmentSchema = Type.Object({
+  file: Type.String({ description: "Base64-encoded file content" }),
+  fileName: Type.String({ description: "File name with extension, e.g. photo.png" }),
+  contentType: Type.Optional(Type.String({ description: "MIME type, e.g. image/png" })),
+});
+
 const schema = Type.Object({
   secretName: Type.String(),
-  title: Type.Optional(Type.String()),
+  title: Type.String(),
   text: Type.Optional(Type.String()),
   ipaddress: Type.String(),
-  attachments: Type.Optional(Type.Array(Type.String())),
+  bucket: Type.Optional(Type.String({ default: "posts", description: "Supabase storage bucket name" })),
+  attachments: Type.Optional(Type.Array(attachmentSchema)),
 });
 
 createPost.post('/createPost', tbValidator('json', schema), async (c) => {
   try {
     const body = c.req.valid('json');
-    const { secretName, title, text, ipaddress, attachments } = body;
+    const { secretName, title, text, ipaddress, bucket, attachments } = body;
 
     // Find or create secret
     let secretResult = await dbClient
@@ -83,6 +91,40 @@ createPost.post('/createPost', tbValidator('json', schema), async (c) => {
       return c.json(res, 429);
     }
 
+    // Upload attachments to Supabase Storage
+    let attachmentUrls: string[] = [];
+    if (attachments && attachments.length > 0) {
+      const supabase = getSupabaseStorageClient(c.env);
+      const storageBucket = bucket ?? "attachments";
+
+      for (const att of attachments) {
+        const decoded = Uint8Array.from(atob(att.file), (char) => char.charCodeAt(0));
+        const storagePath = `${secretName}/${Date.now()}-${att.fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from(storageBucket)
+          .upload(storagePath, decoded, {
+            contentType: att.contentType ?? 'application/octet-stream',
+            upsert: false,
+          });
+
+        if (uploadError) {
+          const res: GenericResponseInterface = {
+            success: false,
+            message: `Attachment upload failed for "${att.fileName}": ${uploadError.message}`,
+            data: null,
+          };
+          return c.json(res, 400);
+        }
+
+        const { data: urlData } = supabase.storage
+          .from(storageBucket)
+          .getPublicUrl(storagePath);
+
+        attachmentUrls.push(urlData?.publicUrl ?? '');
+      }
+    }
+
     // Create post
     const insertResult = await dbClient
       .insert(posts)
@@ -91,7 +133,7 @@ createPost.post('/createPost', tbValidator('json', schema), async (c) => {
         title: title ?? null,
         text: text ?? null,
         ipaddress,
-        attachments: attachments ?? [],
+        attachments: attachmentUrls,
         isDeleted: false,
       })
       .returning({

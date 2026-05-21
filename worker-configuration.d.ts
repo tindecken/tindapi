@@ -14,6 +14,8 @@ declare namespace Cloudflare {
 		TURSO_DATABASE_URL: string;
 		TURSO_AUTH_TOKEN: string;
 		SUPABASE_DATABASE_AORPPOST_URL: string;
+		SUPABASE_URL: string;
+		SUPABASE_SERVICE_ROLE_KEY: string;
 	}
 	interface ProductionEnv {
 		ASSETS: Fetcher;
@@ -24,6 +26,8 @@ declare namespace Cloudflare {
 		TURSO_DATABASE_URL: string;
 		TURSO_AUTH_TOKEN: string;
 		SUPABASE_DATABASE_AORPPOST_URL: string;
+		SUPABASE_URL: string;
+		SUPABASE_SERVICE_ROLE_KEY: string;
 	}
 	interface Env {
 		ASSETS: Fetcher;
@@ -34,6 +38,8 @@ declare namespace Cloudflare {
 		TURSO_DATABASE_URL: string;
 		TURSO_AUTH_TOKEN: string;
 		SUPABASE_DATABASE_AORPPOST_URL: string;
+		SUPABASE_URL: string;
+		SUPABASE_SERVICE_ROLE_KEY: string;
 	}
 }
 interface Env extends Cloudflare.Env {}
@@ -41,7 +47,7 @@ type StringifyValues<EnvType extends Record<string, unknown>> = {
 	[Binding in keyof EnvType]: EnvType[Binding] extends string ? EnvType[Binding] : string;
 };
 declare namespace NodeJS {
-	interface ProcessEnv extends StringifyValues<Pick<Cloudflare.Env, "ENVIRONMENT" | "SPREADSHEET_ID" | "GCP_SERVICE_ACCOUNT_EMAIL" | "GCP_PRIVATE_KEY" | "TURSO_DATABASE_URL" | "TURSO_AUTH_TOKEN" | "SUPABASE_DATABASE_AORPPOST_URL">> {}
+	interface ProcessEnv extends StringifyValues<Pick<Cloudflare.Env, "ENVIRONMENT" | "SPREADSHEET_ID" | "GCP_SERVICE_ACCOUNT_EMAIL" | "GCP_PRIVATE_KEY" | "TURSO_DATABASE_URL" | "TURSO_AUTH_TOKEN" | "SUPABASE_DATABASE_AORPPOST_URL" | "SUPABASE_URL" | "SUPABASE_SERVICE_ROLE_KEY">> {}
 }
 
 // Begin runtime types
@@ -11128,7 +11134,7 @@ interface IncomingRequestCfPropertiesTLSClientAuthPlaceholder {
     certNotAfter: "";
 }
 /** Possible outcomes of TLS verification */
-declare type CertVerificationStatus = 
+declare type CertVerificationStatus =
 /** Authentication succeeded */
 "SUCCESS"
 /** No certificate was presented */
@@ -11196,7 +11202,7 @@ interface D1ExecResult {
     count: number;
     duration: number;
 }
-type D1SessionConstraint = 
+type D1SessionConstraint =
 // Indicates that the first query should go to the primary, and the rest queries
 // using the same D1DatabaseSession will go to any replica that is consistent with
 // the bookmark maintained by the session (returned by the first query).
@@ -12007,7 +12013,7 @@ declare namespace Rpc {
     // The reason for using a generic type here is to build a serializable subset of structured
     //   cloneable composite types. This allows types defined with the "interface" keyword to pass the
     //   serializable check as well. Otherwise, only types defined with the "type" keyword would pass.
-    type Serializable<T> = 
+    type Serializable<T> =
     // Structured cloneables
     BaseType
     // Structured cloneable composites

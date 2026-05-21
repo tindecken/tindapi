@@ -18,6 +18,7 @@ import { getEnvironmentVars } from "./routes/spreadsheet/getEnvironmentVars";
 import { addLog } from "./routes/database/addLog";
 import { getPostsBySecretName } from "./routes/supabase/getPostsBySecretName";
 import { createPost } from "./routes/supabase/createPost";
+import { uploadFile } from "./routes/supabase/uploadFile";
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -55,5 +56,6 @@ app.route("/spreadsheet", getEnvironmentVars);
 app.route("/database", addLog);
 app.route("/supabase", getPostsBySecretName);
 app.route("/supabase", createPost);
+app.route("/supabase", uploadFile);
 
 export default app;
