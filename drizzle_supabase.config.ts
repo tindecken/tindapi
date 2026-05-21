@@ -4,7 +4,7 @@ import { config } from 'dotenv';
 config({ path: '.dev.vars' }); // or .env.local
 
 export default defineConfig({
-  schema: './drizzle_supabase/db/schema',
+  schema: './drizzle_supabase/migrations',
   out: './drizzle_supabase/migrations',
   dialect: 'postgresql',
   dbCredentials: {

@@ -95,11 +95,11 @@ createPost.post('/createPost', tbValidator('json', schema), async (c) => {
     let attachmentUrls: string[] = [];
     if (attachments && attachments.length > 0) {
       const supabase = getSupabaseStorageClient(c.env);
-      const storageBucket = bucket ?? "attachments";
+      const storageBucket = bucket ?? "posts";
 
       for (const att of attachments) {
         const decoded = Uint8Array.from(atob(att.file), (char) => char.charCodeAt(0));
-        const storagePath = `${secretName}/${Date.now()}-${att.fileName}`;
+        const storagePath = `sid${secretId}/${crypto.randomUUID()}-${att.fileName}`;
 
         const { error: uploadError } = await supabase.storage
           .from(storageBucket)
@@ -117,11 +117,7 @@ createPost.post('/createPost', tbValidator('json', schema), async (c) => {
           return c.json(res, 400);
         }
 
-        const { data: urlData } = supabase.storage
-          .from(storageBucket)
-          .getPublicUrl(storagePath);
-
-        attachmentUrls.push(urlData?.publicUrl ?? '');
+        attachmentUrls.push(storagePath ?? '');
       }
     }
 
