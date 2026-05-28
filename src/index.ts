@@ -18,11 +18,27 @@ import { getEnvironmentVars } from "./routes/spreadsheet/getEnvironmentVars";
 import { addLog } from "./routes/database/addLog";
 import { getPostsBySecretName } from "./routes/supabase/getPostsBySecretName";
 import { createPost } from "./routes/supabase/createPost";
+import { testSupabase } from './routes/supabase/testSupabase';
 
 const app = new Hono<{ Bindings: Env }>();
 
 app.use("*", cors({
-  origin: ['http://tindecken.xyz', 'https://tindecken.xyz', 'http://localhost', 'https://localhost:1000', 'http://localhost:1000', 'http://localhost:3001', 'https://paperwork.tindecken.xyz', 'https://paperworkapi.tindecken.xyz', 'https://192.168.1.99:9090', 'http://192.168.1.99:9090', 'capacitor://192.168.1.99:9090', 'capacitor://192.168.1.99', 'https://192.168.1.3:9090', 'https://192.168.1.3:1000', 'https://10.10.0.27:1000', 'https://10.10.0.27:3001', 'http://localhost:9000', 'https://d.tindecken.xyz'],
+  origin: (origin) => {
+    const allowedOrigins = [
+      'http://tindecken.xyz', 'https://tindecken.xyz',
+      'https://paperwork.tindecken.xyz', 'https://paperworkapi.tindecken.xyz',
+      'https://192.168.1.99:9090', 'http://192.168.1.99:9090',
+      'capacitor://192.168.1.99:9090', 'capacitor://192.168.1.99',
+      'https://192.168.1.3:9090', 'https://192.168.1.3:1000',
+      'https://10.10.0.27:1000', 'https://10.10.0.27:3001',
+      'https://d.tindecken.xyz'
+    ];
+    if (!origin) return null;
+    if (allowedOrigins.includes(origin)) return origin;
+    // Allow any localhost with any port (http and https)
+    if (/^https?:\/\/localhost(:\d+)?$/.test(origin)) return origin;
+    return null;
+  },
   allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowHeaders: ['Content-Type', 'Authorization', 'Accept'],
   credentials: true,
@@ -55,5 +71,6 @@ app.route("/spreadsheet", getEnvironmentVars);
 app.route("/database", addLog);
 app.route("/supabase", getPostsBySecretName);
 app.route("/supabase", createPost);
+app.route("/supabase", testSupabase);
 
 export default app;

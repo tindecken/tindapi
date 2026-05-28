@@ -2,22 +2,26 @@ import { Hono } from "hono";
 import { tbValidator } from '@hono/typebox-validator'
 import Type from 'typebox'
 import type { GenericResponseInterface } from '../../models/GenericResponseInterface';
-import { dbClient } from '../../../drizzle_supabase/db/dbclient';
+import { createDBClient } from '../../../drizzle_supabase/db/dbclient';
 import { posts, secrets } from '../../../drizzle_supabase/migrations/schema';
 import { eq, and, desc, sql } from "drizzle-orm";
+
+
 
 export const getPostsBySecretName = new Hono<{ Bindings: Env }>();
 
 const schema = Type.Object({
   secretName: Type.String(),
-  limit: Type.Optional(Type.Number({ default: 50, minimum: 1, maximum: 200 })),
-  offset: Type.Optional(Type.Number({ default: 0, minimum: 0 })),
+	limit: Type.Optional(Type.String({ pattern: '^[0-9]+$', default: '50' })),
+  offset: Type.Optional(Type.String({ pattern: '^[0-9]+$', default: '0' })),
 });
 
 getPostsBySecretName.get('/getPostsBySecretName', tbValidator('query', schema), async (c) => {
   try {
+		const dbClient = createDBClient();
     const { secretName, limit, offset } = c.req.valid('query');
-
+		const limitNum = parseInt(limit ?? '50', 10);
+    const offsetNum = parseInt(offset ?? '0', 10);
     // Find the secret by name
     const secretResult = await dbClient
       .select({ id: secrets.id })
@@ -68,8 +72,8 @@ getPostsBySecretName.get('/getPostsBySecretName', tbValidator('query', schema), 
         )
       )
       .orderBy(desc(posts.createdAt))
-      .limit(limit ?? 50)
-      .offset(offset ?? 0);
+      .limit(limitNum)
+			.offset(offsetNum)
 
     const res: GenericResponseInterface = {
       success: true,

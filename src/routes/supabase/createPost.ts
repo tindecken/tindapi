@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import { tbValidator } from '@hono/typebox-validator'
 import Type from 'typebox'
 import type { GenericResponseInterface } from '../../models/GenericResponseInterface';
-import { dbClient } from '../../../drizzle_supabase/db/dbclient';
+import { createDBClient } from '../../../drizzle_supabase/db/dbclient';
 import { posts, secrets, configures } from '../../../drizzle_supabase/migrations/schema';
 import { eq, and, gt, lt, sql } from "drizzle-orm";
 import { getSupabaseStorageClient } from '../../utils/supabaseStorage';
@@ -26,6 +26,7 @@ const schema = Type.Object({
 
 createPost.post('/createPost', tbValidator('json', schema), async (c) => {
   try {
+		const dbClient = createDBClient();
     const body = c.req.valid('json');
     const { secretName, title, text, ipaddress, bucket, attachments } = body;
 
@@ -163,6 +164,8 @@ createPost.post('/createPost', tbValidator('json', schema), async (c) => {
 });
 
 async function isMaxPostNumberPerDayAsync(ipaddress: string): Promise<boolean> {
+	const dbClient = createDBClient();
+
   const now = new Date();
   const startDateString = now.toISOString().split('T')[0] + 'T00:00:00.001Z';
   const endDateString = now.toISOString().split('T')[0] + 'T23:59:59.999Z';
