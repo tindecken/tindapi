@@ -29,6 +29,11 @@ bun --env-file=.dev.vars run drizzle-kit check
 bun --env-file=.dev.vars run drizzle-kit up
 bun --env-file=.dev.vars run drizzle-kit studio
 ```
+### With specific configure file
+```bash
+bun --env-file=.dev.vars drizzle-kit generate --config=drizzle_turso_tind_tracking.config.ts
+bun --env-file=.dev.vars drizzle-kit push --config=drizzle_turso_tind_tracking.config.ts
+```
 
 ### Deploy to production
 ```bash
