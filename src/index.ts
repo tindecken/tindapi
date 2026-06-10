@@ -1,5 +1,6 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
+import { getAuth } from './auth';
 import { getAllTransactions } from "./routes/spreadsheet/getAllTransactions";
 import { lastTransaction } from "./routes/spreadsheet/lastTransaction";
 import { nhiRemaining } from "./routes/spreadsheet/nhiRemaining";
@@ -20,7 +21,29 @@ import { getPostsBySecretName } from "./routes/supabase/getPostsBySecretName";
 import { createPost } from "./routes/supabase/createPost";
 import { testSupabase } from './routes/supabase/testSupabase';
 
-const app = new Hono<{ Bindings: Env }>();
+type Variables = {
+  user: {
+    id: string;
+    name: string;
+    email: string;
+    emailVerified: boolean;
+    image: string | null;
+    createdAt: number;
+    updatedAt: number;
+  } | null;
+  session: {
+    id: string;
+    userId: string;
+    token: string;
+    expiresAt: number;
+    ipAddress: string | null;
+    userAgent: string | null;
+    createdAt: number;
+    updatedAt: number;
+  } | null;
+};
+
+const app = new Hono<{ Bindings: Env; Variables: Variables }>();
 
 app.use("*", cors({
   origin: (origin) => {
@@ -45,6 +68,26 @@ app.use("*", cors({
   exposeHeaders: ['Content-Length', 'X-Kuma-Revision', 'X-Retry-After'],
   maxAge: 10 * 60
 }))
+
+app.use("*", async (c, next) => {
+  const path = c.req.path;
+  if (path.startsWith("/tind_tracking/auth")) {
+    await next();
+    return;
+  }
+  const auth = getAuth(c.env);
+  const session = await auth!.api.getSession({
+    headers: c.req.raw.headers,
+  });
+  c.set("user", (session?.user ?? null) as any);
+  c.set("session", (session?.session ?? null) as any);
+  await next();
+});
+
+app.on(["POST", "GET"], "/tind_tracking/auth/*", async (c) => {
+  const auth = getAuth(c.env);
+  return auth!.handler(c.req.raw);
+});
 
 app.get('/', (c) => {
 	return c.json({

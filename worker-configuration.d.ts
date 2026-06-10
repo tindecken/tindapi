@@ -16,6 +16,10 @@ declare namespace Cloudflare {
 		SUPABASE_DATABASE_AORPPOST_URL: string;
 		SUPABASE_URL: string;
 		SUPABASE_SERVICE_ROLE_KEY: string;
+		BETTER_AUTH_SECRET: string;
+		BETTER_AUTH_URL: string;
+		GOOGLE_CLIENT_ID: string;
+		GOOGLE_CLIENT_SECRET: string;
 	}
 	interface ProductionEnv {
 		ASSETS: Fetcher;
@@ -28,6 +32,10 @@ declare namespace Cloudflare {
 		SUPABASE_DATABASE_AORPPOST_URL: string;
 		SUPABASE_URL: string;
 		SUPABASE_SERVICE_ROLE_KEY: string;
+		BETTER_AUTH_SECRET: string;
+		BETTER_AUTH_URL: string;
+		GOOGLE_CLIENT_ID: string;
+		GOOGLE_CLIENT_SECRET: string;
 	}
 	interface Env {
 		ASSETS: Fetcher;
@@ -40,6 +48,10 @@ declare namespace Cloudflare {
 		SUPABASE_DATABASE_AORPPOST_URL: string;
 		SUPABASE_URL: string;
 		SUPABASE_SERVICE_ROLE_KEY: string;
+		BETTER_AUTH_SECRET: string;
+		BETTER_AUTH_URL: string;
+		GOOGLE_CLIENT_ID: string;
+		GOOGLE_CLIENT_SECRET: string;
 	}
 }
 interface Env extends Cloudflare.Env {}
@@ -47,7 +59,7 @@ type StringifyValues<EnvType extends Record<string, unknown>> = {
 	[Binding in keyof EnvType]: EnvType[Binding] extends string ? EnvType[Binding] : string;
 };
 declare namespace NodeJS {
-	interface ProcessEnv extends StringifyValues<Pick<Cloudflare.Env, "ENVIRONMENT" | "SPREADSHEET_ID" | "GCP_SERVICE_ACCOUNT_EMAIL" | "GCP_PRIVATE_KEY" | "TURSO_DATABASE_URL" | "TURSO_AUTH_TOKEN" | "SUPABASE_DATABASE_AORPPOST_URL" | "SUPABASE_URL" | "SUPABASE_SERVICE_ROLE_KEY">> {}
+	interface ProcessEnv extends StringifyValues<Pick<Cloudflare.Env, "ENVIRONMENT" | "SPREADSHEET_ID" | "GCP_SERVICE_ACCOUNT_EMAIL" | "GCP_PRIVATE_KEY" | "TURSO_DATABASE_URL" | "TURSO_AUTH_TOKEN" | "SUPABASE_DATABASE_AORPPOST_URL" | "SUPABASE_URL" | "SUPABASE_SERVICE_ROLE_KEY" | "BETTER_AUTH_SECRET" | "BETTER_AUTH_URL" | "GOOGLE_CLIENT_ID" | "GOOGLE_CLIENT_SECRET">> {}
 }
 
 // Begin runtime types
