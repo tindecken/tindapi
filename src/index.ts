@@ -25,13 +25,13 @@ const app = new Hono<{ Bindings: Env }>();
 app.use("*", cors({
   origin: (origin) => {
     const allowedOrigins = [
-      'http://tindecken.xyz', 'https://tindecken.xyz',
-      'https://paperwork.tindecken.xyz', 'https://paperworkapi.tindecken.xyz',
+      'http://tindecken.com', 'https://tindecken.com',
+      'https://paperwork.tindecken.com', 'https://paperworkapi.tindecken.com',
       'https://192.168.1.99:9090', 'http://192.168.1.99:9090',
       'capacitor://192.168.1.99:9090', 'capacitor://192.168.1.99',
       'https://192.168.1.3:9090', 'https://192.168.1.3:1000',
       'https://10.10.0.27:1000', 'https://10.10.0.27:3001',
-      'https://d.tindecken.xyz'
+      'https://d.tindecken.com'
     ];
     if (!origin) return null;
     if (allowedOrigins.includes(origin)) return origin;
