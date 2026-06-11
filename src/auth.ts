@@ -11,11 +11,11 @@ let authInstance: any = null;
 export function getAuth(env: Env) {
   if (authInstance) return authInstance;
 
-  const client = createClient({
+  const dbClient = createClient({
     url: env.TURSO_DATABASE_URL,
     authToken: env.TURSO_AUTH_TOKEN,
   });
-  const db = drizzle(client, { schema });
+  const db = drizzle(dbClient, { schema });
 
   authInstance = betterAuth({
     appName: "TindAPI",
@@ -39,6 +39,7 @@ export function getAuth(env: Env) {
       "http://localhost:8787",
       "http://localhost:5173",
       "http://localhost:3000",
+			"http://localhost:9000",
       "https://d.tindecken.com",
     ],
   });

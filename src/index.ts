@@ -54,7 +54,7 @@ app.use("*", cors({
       'capacitor://192.168.1.99:9090', 'capacitor://192.168.1.99',
       'https://192.168.1.3:9090', 'https://192.168.1.3:1000',
       'https://10.10.0.27:1000', 'https://10.10.0.27:3001',
-      'https://d.tindecken.com'
+      'https://d.tindecken.com', 'http://localhost:9000'
     ];
     if (!origin) return null;
     if (allowedOrigins.includes(origin)) return origin;
