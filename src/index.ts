@@ -84,6 +84,32 @@ app.use("*", async (c, next) => {
   await next();
 });
 
+app.get("/tind_tracking/auth/sign-in/:provider", async (c) => {
+  const provider = c.req.param("provider");
+  const url = new URL(c.req.url);
+  const baseURL = `${url.protocol}//${url.host}`;
+  const callbackURL = `${baseURL}/tind_tracking/auth/callback/${provider}`;
+
+  const res = await fetch(`${baseURL}/tind_tracking/auth/sign-in/social`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ provider, callbackURL }),
+  });
+
+  const data = await res.json<{ url?: string }>();
+  if (data.url) {
+    const headers = new Headers();
+    headers.set("Location", data.url);
+    for (const [key, value] of res.headers) {
+      if (key.toLowerCase() === "set-cookie") {
+        headers.append("Set-Cookie", value);
+      }
+    }
+    return new Response(null, { status: 302, headers });
+  }
+  return c.json(data, 500);
+});
+
 app.on(["POST", "GET"], "/tind_tracking/auth/*", async (c) => {
   const auth = getAuth(c.env);
   return auth!.handler(c.req.raw);

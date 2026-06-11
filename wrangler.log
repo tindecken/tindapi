@@ -1,0 +1,25 @@
+
+ Ôøà´©Å wrangler 4.90.0 (update available 4.99.0)
+ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+Using secrets defined in .dev.vars
+Your Worker has access to the following bindings:
+Binding                                              Resource                  Mode
+env.ASSETS                                           Assets                    local
+env.ENVIRONMENT ("(hidden)")                         Environment Variable      local
+env.SPREADSHEET_ID ("(hidden)")                      Environment Variable      local
+env.GCP_SERVICE_ACCOUNT_EMAIL ("(hidden)")           Environment Variable      local
+env.GCP_PRIVATE_KEY ("(hidden)")                     Environment Variable      local
+env.TURSO_DATABASE_URL ("(hidden)")                  Environment Variable      local
+env.TURSO_AUTH_TOKEN ("(hidden)")                    Environment Variable      local
+env.SUPABASE_DATABASE_AORPPOST_URL ("(hidden)")      Environment Variable      local
+env.SUPABASE_URL ("(hidden)")                        Environment Variable      local
+env.SUPABASE_SERVICE_ROLE_KEY ("(hidden)")           Environment Variable      local
+env.BETTER_AUTH_SECRET ("(hidden)")                  Environment Variable      local
+env.BETTER_AUTH_URL ("(hidden)")                     Environment Variable      local
+env.GOOGLE_CLIENT_ID ("(hidden)")                    Environment Variable      local
+env.GOOGLE_CLIENT_SECRET ("(hidden)")                Environment Variable      local
+
+ÔÄö Starting local server...
+process.env.TURSO_DATABASE_URL! libsql://tindtracking-tindecken.aws-ap-northeast-1.turso.io
+process.env.SUPABASE_DATABASE_AORPPOST_URL! postgresql://postgres.gqurwsjktleqmzjgzotu:Tind1@Rivaldo@@aws-0-ap-southeast-1.pooler.supabase.com:5432/postgres
+[wrangler:info] Ready on http://127.0.0.1:8787
