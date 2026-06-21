@@ -5,6 +5,8 @@ https://dash.cloudflare.com/5a9337c6b42dd87fb9743274de65ce86/workers/services/vi
 ```bash
 bunx wrangler secret list --env production
 ```
+### View secrets on web fro production environemtn
+https://dash.cloudflare.com/5a9337c6b42dd87fb9743274de65ce86/workers/services/view/tindapi-production/production/settings
 ### Push secret to production environment
 ```bash
 bunx wrangler secret push <NAME> --env production
@@ -35,6 +37,10 @@ bun --env-file=.dev.vars drizzle-kit generate --config=drizzle_turso_tind_tracki
 bun --env-file=.dev.vars drizzle-kit push --config=drizzle_turso_tind_tracking.config.ts
 ```
 
+### seed the tind_tracking database
+```bash
+bun run .\drizzle_tind_tracking\db\seed.ts
+```
 ### Deploy to production
 ```bash
 bun run deploy --env="production"

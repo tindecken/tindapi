@@ -1,0 +1,58 @@
+import { betterAuth } from 'better-auth';
+import { drizzleAdapter } from 'better-auth/adapters/drizzle';
+import { bearer } from 'better-auth/plugins';
+import { createClient } from '@libsql/client';
+import { drizzle } from 'drizzle-orm/libsql';
+import * as schema from '../../drizzle_tind_tracking/db/schema';
+import { expo } from '@better-auth/expo';
+import { ulid } from 'ulid';
+import { createDbClient } from '../../drizzle_tind_tracking/db/dbClient'
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let authInstance: any = null;
+
+export function getAuth(env: Env) {
+	if (authInstance) return authInstance;
+	const { db } = createDbClient(env);
+	authInstance = betterAuth({
+		appName: 'TindAPI',
+		secret: env.BETTER_AUTH_SECRET,
+		baseURL: env.BETTER_AUTH_URL,
+		basePath: '/tracking/auth',
+		database: drizzleAdapter(db, {
+			provider: 'sqlite',
+		}),
+		advanced: {
+			database: {
+				generateId: () => {
+					return ulid();
+				},
+			},
+			ipAddress: {
+				ipAddressHeaders: ['x-forwarded-for', 'x-real-ip', 'cf-connecting-ip', 'true-client-ip'],
+				disableIpTracking: false,
+			},
+		},
+		emailAndPassword: {
+			enabled: true,
+		},
+		socialProviders: {
+			google: {
+				clientId: env.GOOGLE_CLIENT_ID,
+				clientSecret: env.GOOGLE_CLIENT_SECRET,
+			},
+		},
+		plugins: [bearer(), expo()],
+		trustedOrigins: [
+			'http://localhost:8787',
+			'http://localhost:5173',
+			'http://localhost:3000',
+			'http://localhost:9000',
+			'https://d.tindecken.com',
+			'*',
+			'*://*',
+		],
+	});
+
+	return authInstance;
+}

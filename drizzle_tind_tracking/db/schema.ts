@@ -1,15 +1,7 @@
 import { sqliteTable, text, integer, real } from "drizzle-orm/sqlite-core";
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 
 // ===== Type Aliases =====
-
-export type TransactionType =
-  | "standard"
-  | "offset"
-  | "must_pay"
-  | "transfer"
-  | "delegated_transfer"
-  | "reconciliation";
 
 export type ActionType =
   | "create"
@@ -27,11 +19,11 @@ export const user = sqliteTable("user", {
   email: text("email").notNull().unique(),
   emailVerified: integer("email_verified", { mode: "boolean" }).notNull(),
   image: text("image"),
-  createdAt: integer("created_at").notNull().$defaultFn(() => Date.now()),
+  createdAt: integer("created_at").notNull().$defaultFn(() => sql`(CURRENT_TIMESTAMP)`),
   updatedAt: integer("updated_at")
     .notNull()
-    .$defaultFn(() => Date.now())
-    .$onUpdateFn(() => Date.now()),
+    .$defaultFn(() => sql`(CURRENT_TIMESTAMP)`)
+    .$onUpdateFn(() => sql`(CURRENT_TIMESTAMP)`),
 });
 
 export const session = sqliteTable("session", {
@@ -43,11 +35,11 @@ export const session = sqliteTable("session", {
   expiresAt: integer("expires_at").notNull(),
   ipAddress: text("ip_address"),
   userAgent: text("user_agent"),
-  createdAt: integer("created_at").notNull().$defaultFn(() => Date.now()),
+  createdAt: integer("created_at").notNull().$defaultFn(() => sql`(CURRENT_TIMESTAMP)`),
   updatedAt: integer("updated_at")
     .notNull()
-    .$defaultFn(() => Date.now())
-    .$onUpdateFn(() => Date.now()),
+    .$defaultFn(() => sql`(CURRENT_TIMESTAMP)`)
+    .$onUpdateFn(() => sql`(CURRENT_TIMESTAMP)`),
 });
 
 export const account = sqliteTable("account", {
@@ -64,11 +56,11 @@ export const account = sqliteTable("account", {
   scope: text("scope"),
   idToken: text("id_token"),
   password: text("password"),
-  createdAt: integer("created_at").notNull().$defaultFn(() => Date.now()),
+  createdAt: integer("created_at").notNull().$defaultFn(() => sql`(CURRENT_TIMESTAMP)`),
   updatedAt: integer("updated_at")
     .notNull()
-    .$defaultFn(() => Date.now())
-    .$onUpdateFn(() => Date.now()),
+    .$defaultFn(() => sql`(CURRENT_TIMESTAMP)`)
+    .$onUpdateFn(() => sql`(CURRENT_TIMESTAMP)`),
 });
 
 export const verification = sqliteTable("verification", {
@@ -76,11 +68,11 @@ export const verification = sqliteTable("verification", {
   identifier: text("identifier").notNull(),
   value: text("value").notNull(),
   expiresAt: integer("expires_at").notNull(),
-  createdAt: integer("created_at").notNull().$defaultFn(() => Date.now()),
+  createdAt: integer("created_at").notNull().$defaultFn(() => sql`(CURRENT_TIMESTAMP)`),
   updatedAt: integer("updated_at")
     .notNull()
-    .$defaultFn(() => Date.now())
-    .$onUpdateFn(() => Date.now()),
+    .$defaultFn(() => sql`(CURRENT_TIMESTAMP)`)
+    .$onUpdateFn(() => sql`(CURRENT_TIMESTAMP)`),
 });
 
 // ===== Application Tables =====
@@ -94,11 +86,11 @@ export const wallets = sqliteTable("wallet", {
   isDefault: integer("is_default", { mode: "boolean" }).notNull().default(false),
   isDelegated: integer("is_delegated", { mode: "boolean" }).notNull().default(false),
   balance: real("balance").notNull().default(0),
-  createdAt: integer("created_at").notNull().$defaultFn(() => Date.now()),
+  createdAt: integer("created_at").notNull().$defaultFn(() => sql`(CURRENT_TIMESTAMP)`),
   updatedAt: integer("updated_at")
     .notNull()
-    .$defaultFn(() => Date.now())
-    .$onUpdateFn(() => Date.now()),
+    .$defaultFn(() => sql`(CURRENT_TIMESTAMP)`)
+    .$onUpdateFn(() => sql`(CURRENT_TIMESTAMP)`),
 });
 
 export const currencies = sqliteTable("currency", {
@@ -108,13 +100,31 @@ export const currencies = sqliteTable("currency", {
   isDefault: integer("is_default", { mode: "boolean" }).notNull().default(false),
 });
 
+export const rates = sqliteTable("rate", {
+  id: text("id").primaryKey(),
+  currencyFrom: text("currency_from")
+    .notNull()
+    .references(() => currencies.id, { onDelete: "restrict" }),
+  currencyTo: text("currency_to")
+    .notNull()
+    .references(() => currencies.id, { onDelete: "restrict" }),
+  rate: real("rate").notNull(),
+  dateRate: integer("date_rate").notNull(),
+  createdAt: integer("created_at").notNull().$defaultFn(() => sql`(CURRENT_TIMESTAMP)`),
+});
+
 export const categories = sqliteTable("category", {
   id: text("id").primaryKey(),
-  name: text("name").notNull(),
+  name: text("name").notNull().unique(),
   icon: text("icon"),
   color: text("color"),
-  isSystem: integer("is_system", { mode: "boolean" }).notNull().default(false),
   userId: text("user_id").references(() => user.id, { onDelete: "set null" }),
+	isDefault: integer("is_default", { mode: "boolean" }).notNull().default(false),
+	createdAt: integer("created_at").notNull().$defaultFn(() => sql`(CURRENT_TIMESTAMP)`),
+	updatedAt: integer("updated_at")
+    .notNull()
+    .$defaultFn(() => sql`(CURRENT_TIMESTAMP)`)
+    .$onUpdateFn(() => sql`(CURRENT_TIMESTAMP)`),
 });
 
 export const monthPeriods = sqliteTable("month_period", {
@@ -123,7 +133,7 @@ export const monthPeriods = sqliteTable("month_period", {
   startDate: integer("start_date").notNull(),
   endDate: integer("end_date").notNull(),
   isActive: integer("is_active", { mode: "boolean" }).notNull().default(false),
-  createdAt: integer("created_at").notNull().$defaultFn(() => Date.now()),
+  createdAt: integer("created_at").notNull().$defaultFn(() => sql`(CURRENT_TIMESTAMP)`),
 });
 
 export const mustPayTransactions = sqliteTable("must_pay_transaction", {
@@ -139,16 +149,15 @@ export const mustPayTransactions = sqliteTable("must_pay_transaction", {
     .references(() => currencies.id, { onDelete: "restrict" }),
   categoryId: text("category_id").references(() => categories.id, { onDelete: "set null" }),
   sortOrder: integer("sort_order").notNull().default(0),
-  createdAt: integer("created_at").notNull().$defaultFn(() => Date.now()),
+  createdAt: integer("created_at").notNull().$defaultFn(() => sql`(CURRENT_TIMESTAMP)`),
   updatedAt: integer("updated_at")
     .notNull()
-    .$defaultFn(() => Date.now())
-    .$onUpdateFn(() => Date.now()),
+    .$defaultFn(() => sql`(CURRENT_TIMESTAMP)`)
+    .$onUpdateFn(() => sql`(CURRENT_TIMESTAMP)`),
 });
 
 export const transactions = sqliteTable("transaction", {
   id: text("id").primaryKey(),
-  type: text("type").$type<TransactionType>().notNull(),
   walletId: text("wallet_id")
     .notNull()
     .references(() => wallets.id, { onDelete: "restrict" }),
@@ -158,10 +167,9 @@ export const transactions = sqliteTable("transaction", {
   currencyId: text("currency_id")
     .notNull()
     .references(() => currencies.id, { onDelete: "restrict" }),
-  timestamp: integer("timestamp").notNull().$defaultFn(() => Date.now()),
+  date: integer("timestamp").notNull().$defaultFn(() => sql`(CURRENT_TIMESTAMP)`),
   notes: text("notes"),
-  categoryId: text("category_id").references(() => categories.id, { onDelete: "set null" }),
-  customCategory: text("custom_category"),
+  category: text("category"),
   monthPeriodId: text("month_period_id")
     .notNull()
     .references(() => monthPeriods.id, { onDelete: "restrict" }),
@@ -169,14 +177,29 @@ export const transactions = sqliteTable("transaction", {
     () => mustPayTransactions.id,
     { onDelete: "set null" }
   ),
-  relatedTransactionId: text("related_transaction_id").references(() => transactions.id, {
-    onDelete: "set null",
-  }),
-  createdAt: integer("created_at").notNull().$defaultFn(() => Date.now()),
+  transactionTypeId: text("transaction_type_id").references(
+    () => transactionTypes.id,
+    { onDelete: "set null" }
+  ),
+  createdAt: integer("created_at").notNull().$defaultFn(() => sql`(CURRENT_TIMESTAMP)`),
   updatedAt: integer("updated_at")
     .notNull()
-    .$defaultFn(() => Date.now())
-    .$onUpdateFn(() => Date.now()),
+    .$defaultFn(() => sql`(CURRENT_TIMESTAMP)`)
+    .$onUpdateFn(() => sql`(CURRENT_TIMESTAMP)`),
+});
+
+export const transactionTypes = sqliteTable("transaction_type", {
+  id: text("id").primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  isDefault: integer("is_default", { mode: "boolean" }).notNull().default(false),
+  createdAt: integer("created_at").notNull().$defaultFn(() => sql`(CURRENT_TIMESTAMP)`),
+  updatedAt: integer("updated_at")
+    .notNull()
+    .$defaultFn(() => sql`(CURRENT_TIMESTAMP)`)
+    .$onUpdateFn(() => sql`(CURRENT_TIMESTAMP)`),
 });
 
 export const withdrawFees = sqliteTable("withdraw_fee", {
@@ -184,7 +207,7 @@ export const withdrawFees = sqliteTable("withdraw_fee", {
   feeAmount: real("fee_amount").notNull(),
   name: text("name").notNull(),
   isDefault: integer("is_default", { mode: "boolean" }).notNull().default(false),
-  createdAt: integer("created_at").notNull().$defaultFn(() => Date.now()),
+  createdAt: integer("created_at").notNull().$defaultFn(() => sql`(CURRENT_TIMESTAMP)`),
 });
 
 export const logs = sqliteTable("log", {
@@ -195,11 +218,15 @@ export const logs = sqliteTable("log", {
   actionType: text("action_type").$type<ActionType>().notNull(),
   message: text("message").notNull(),
   metadata: text("metadata"),
-  timestamp: integer("timestamp").notNull().$defaultFn(() => Date.now()),
+  timestamp: integer("timestamp").notNull().$defaultFn(() => sql`(CURRENT_TIMESTAMP)`),
 });
 
 // ===== Relations =====
-
+// user (1) -> session (many)
+// user (1) -> account (many)
+// user (1) -> wallet (many)
+// user (1) -> category (many)
+// user (1) -> log (many)
 export const userRelations = relations(user, ({ many }) => ({
   sessions: many(session),
   accounts: many(account),
@@ -208,6 +235,7 @@ export const userRelations = relations(user, ({ many }) => ({
   logs: many(logs),
 }));
 
+// session (many) -> user (1)
 export const sessionRelations = relations(session, ({ one }) => ({
   user: one(user, {
     fields: [session.userId],
@@ -215,6 +243,7 @@ export const sessionRelations = relations(session, ({ one }) => ({
   }),
 }));
 
+// account (many) -> user (1)
 export const accountRelations = relations(account, ({ one }) => ({
   user: one(user, {
     fields: [account.userId],
@@ -224,6 +253,9 @@ export const accountRelations = relations(account, ({ one }) => ({
 
 export const verificationRelations = relations(verification, () => ({}));
 
+// wallet (many) -> user (1)
+// wallet (1) -> transaction (many), via walletId
+// wallet (1) -> transaction (many), via toWalletId (incoming transfers)
 export const walletRelations = relations(wallets, ({ one, many }) => ({
   user: one(user, {
     fields: [wallets.userId],
@@ -233,25 +265,56 @@ export const walletRelations = relations(wallets, ({ one, many }) => ({
   incomingTransactions: many(transactions, { relationName: "toWalletTransactions" }),
 }));
 
+// currency (1) -> transaction (many)
+// currency (1) -> must_pay_transaction (many)
+// currency (1) -> rate (many), via currencyFrom
+// currency (1) -> rate (many), via currencyTo
 export const currencyRelations = relations(currencies, ({ many }) => ({
   transactions: many(transactions),
   mustPayTransactions: many(mustPayTransactions),
+  ratesFrom: many(rates, { relationName: "currencyFromRates" }),
+  ratesTo: many(rates, { relationName: "currencyToRates" }),
 }));
 
+// rate (many) -> currency (1), via currencyFrom
+// rate (many) -> currency (1), via currencyTo
+export const rateRelations = relations(rates, ({ one }) => ({
+  currencyFrom: one(currencies, {
+    fields: [rates.currencyFrom],
+    references: [currencies.id],
+    relationName: "currencyFromRates",
+  }),
+  currencyTo: one(currencies, {
+    fields: [rates.currencyTo],
+    references: [currencies.id],
+    relationName: "currencyToRates",
+  }),
+}));
+
+// category (many) -> user (1)
+// category (1) -> transaction (many)
+// category (1) -> must_pay_transaction (many)
 export const categoryRelations = relations(categories, ({ one, many }) => ({
   user: one(user, {
     fields: [categories.userId],
     references: [user.id],
   }),
-  transactions: many(transactions),
   mustPayTransactions: many(mustPayTransactions),
 }));
 
+// month_period (1) -> transaction (many)
+// month_period (1) -> must_pay_transaction (many)
 export const monthPeriodRelations = relations(monthPeriods, ({ many }) => ({
   transactions: many(transactions),
   mustPayTransactions: many(mustPayTransactions),
 }));
 
+// transaction (many) -> wallet (1)
+// transaction (many) -> wallet (1), for transfers (toWallet)
+// transaction (many) -> currency (1)
+// transaction (many) -> month_period (1)
+// transaction (many) -> must_pay_transaction (1)
+// transaction (many) -> transaction_type (1)
 export const transactionRelations = relations(transactions, ({ one, many }) => ({
   wallet: one(wallets, {
     fields: [transactions.walletId],
@@ -267,10 +330,6 @@ export const transactionRelations = relations(transactions, ({ one, many }) => (
     fields: [transactions.currencyId],
     references: [currencies.id],
   }),
-  category: one(categories, {
-    fields: [transactions.categoryId],
-    references: [categories.id],
-  }),
   monthPeriod: one(monthPeriods, {
     fields: [transactions.monthPeriodId],
     references: [monthPeriods.id],
@@ -279,14 +338,16 @@ export const transactionRelations = relations(transactions, ({ one, many }) => (
     fields: [transactions.mustPayTransactionId],
     references: [mustPayTransactions.id],
   }),
-  relatedTransaction: one(transactions, {
-    fields: [transactions.relatedTransactionId],
-    references: [transactions.id],
-    relationName: "relatedTransactions",
+  transactionType: one(transactionTypes, {
+    fields: [transactions.transactionTypeId],
+    references: [transactionTypes.id],
   }),
-  childTransactions: many(transactions, { relationName: "relatedTransactions" }),
 }));
 
+// must_pay_transaction (many) -> month_period (1)
+// must_pay_transaction (many) -> currency (1)
+// must_pay_transaction (many) -> category (1)
+// must_pay_transaction (1) -> transaction (many)
 export const mustPayTransactionRelations = relations(mustPayTransactions, ({ one, many }) => ({
   monthPeriod: one(monthPeriods, {
     fields: [mustPayTransactions.monthPeriodId],
@@ -305,9 +366,24 @@ export const mustPayTransactionRelations = relations(mustPayTransactions, ({ one
 
 export const withdrawFeeRelations = relations(withdrawFees, () => ({}));
 
+// transaction_type (many) -> user (1)
+// transaction_type (1) -> transaction (many)
+export const transactionTypeRelations = relations(transactionTypes, ({ one, many }) => ({
+  user: one(user, {
+    fields: [transactionTypes.userId],
+    references: [user.id],
+  }),
+  transactions: many(transactions),
+}));
+
+// log (many) -> user (1)
 export const logRelations = relations(logs, ({ one }) => ({
   user: one(user, {
     fields: [logs.userId],
     references: [user.id],
   }),
 }));
+
+
+// Export types
+export type InsertTransaction = typeof transactions.$inferInsert;
