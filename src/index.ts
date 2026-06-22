@@ -20,7 +20,11 @@ import { addLog } from "./routes/database/addLog";
 import { getPostsBySecretName } from "./routes/supabase/getPostsBySecretName";
 import { createPost } from "./routes/supabase/createPost";
 import { testSupabase } from './routes/supabase/testSupabase';
-import { transfer } from './routes/tracking/transfer';
+import { transfer } from './routes/tracking/transaction/transfer';
+import { create as createMonthPeriod } from './routes/tracking/monthperiod/create';
+import { get as getMonthPeriod } from './routes/tracking/monthperiod/get';
+import { update as updateMonthPeriod } from './routes/tracking/monthperiod/update';
+import { del as deleteMonthPeriod } from './routes/tracking/monthperiod/delete';
 
 type Variables = {
   user: {
@@ -143,5 +147,9 @@ app.route("/supabase", getPostsBySecretName);
 app.route("/supabase", createPost);
 app.route("/supabase", testSupabase);
 app.route("/tracking", transfer);
+app.route("/tracking", createMonthPeriod);
+app.route("/tracking", getMonthPeriod);
+app.route("/tracking", updateMonthPeriod);
+app.route("/tracking", deleteMonthPeriod);
 
 export default app;

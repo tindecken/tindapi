@@ -1,12 +1,12 @@
 import { Hono } from "hono";
 import Type from 'typebox'
-import type { GenericResponseInterface } from '../../models/GenericResponseInterface';
+import type { GenericResponseInterface } from '../../../models/GenericResponseInterface';
 import { tbValidator } from '@hono/typebox-validator'
 import { eq, desc } from "drizzle-orm";
 import { ulid } from "ulid";
-import { wallets, transactions, monthPeriods, currencies, transactionTypes, InsertTransaction } from "../../../drizzle_tind_tracking/db/schema";
-import { createDbClient } from "../../../drizzle_tind_tracking/db/dbClient";
-import { getAuthenticatedUserInfo } from "../../auth/getAuthenticatedUser";
+import { wallets, transactions, monthPeriods, currencies, transactionTypes, InsertTransaction } from "../../../../drizzle_tind_tracking/db/schema";
+import { createDbClient } from "../../../../drizzle_tind_tracking/db/dbClient";
+import { getAuthenticatedUserInfo } from "../../../auth/getAuthenticatedUser";
 
 
 export const transfer = new Hono<{ Bindings: Env }>();

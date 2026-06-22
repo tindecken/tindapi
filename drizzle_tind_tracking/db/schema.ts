@@ -134,7 +134,14 @@ export const monthPeriods = sqliteTable("month_period", {
   endDate: integer("end_date").notNull(),
   isActive: integer("is_active", { mode: "boolean" }).notNull().default(false),
   createdAt: integer("created_at").notNull().$defaultFn(() => sql`(CURRENT_TIMESTAMP)`),
+  updatedAt: integer("updated_at")
+    .notNull()
+    .$defaultFn(() => sql`(CURRENT_TIMESTAMP)`)
+    .$onUpdateFn(() => sql`(CURRENT_TIMESTAMP)`),
 });
+
+export type InsertMonthPeriod = typeof monthPeriods.$inferInsert;
+export type SelectMonthPeriod = typeof monthPeriods.$inferSelect;
 
 export const mustPayTransactions = sqliteTable("must_pay_transaction", {
   id: text("id").primaryKey(),
