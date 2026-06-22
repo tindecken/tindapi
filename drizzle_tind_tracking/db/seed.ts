@@ -226,8 +226,8 @@ async function seed() {
     {
       id: periodId1,
       name: "May 2026",
-      startDate: sql`strftime('%Y-%m-%d', 'now')`,
-      endDate: sql`strftime('%Y-%m-%d %H:%M:%S', 'now')`,
+      startDate: sql`strftime('%Y-%m-%d', '2026-05-23')`,
+      endDate: sql`strftime('%s', 'now')`,
       isActive: false,
     },
     {
