@@ -19,11 +19,11 @@ export const user = sqliteTable("user", {
   email: text("email").notNull().unique(),
   emailVerified: integer("email_verified", { mode: "boolean" }).notNull(),
   image: text("image"),
-  createdAt: integer("created_at", {mode: "timestamp"}).notNull().$defaultFn(() => sql`(CURRENT_TIMESTAMP)`),
+  createdAt: integer("created_at", {mode: "timestamp"}).notNull().$defaultFn(() => sql`strftime('%s', 'now')`),
   updatedAt: integer("updated_at", {mode: "timestamp"})
     .notNull()
-    .$defaultFn(() => sql`(CURRENT_TIMESTAMP)`)
-    .$onUpdateFn(() => sql`(CURRENT_TIMESTAMP)`),
+    .$defaultFn(() => sql`strftime('%s', 'now')`)
+    .$onUpdateFn(() => sql`strftime('%s', 'now')`),
 });
 
 export const session = sqliteTable("session", {
@@ -35,11 +35,11 @@ export const session = sqliteTable("session", {
   expiresAt: integer("expires_at", {mode: "timestamp"}).notNull(),
   ipAddress: text("ip_address"),
   userAgent: text("user_agent"),
-  createdAt: integer("created_at", {mode: "timestamp"}).notNull().$defaultFn(() => sql`(CURRENT_TIMESTAMP)`),
+  createdAt: integer("created_at", {mode: "timestamp"}).notNull().$defaultFn(() => sql`strftime('%s', 'now')`),
   updatedAt: integer("updated_at", {mode: "timestamp"})
     .notNull()
-    .$defaultFn(() => sql`(CURRENT_TIMESTAMP)`)
-    .$onUpdateFn(() => sql`(CURRENT_TIMESTAMP)`),
+    .$defaultFn(() => sql`strftime('%s', 'now')`)
+    .$onUpdateFn(() => sql`strftime('%s', 'now')`),
 });
 
 export const account = sqliteTable("account", {
@@ -56,11 +56,11 @@ export const account = sqliteTable("account", {
   scope: text("scope"),
   idToken: text("id_token"),
   password: text("password"),
-  createdAt: integer("created_at", {mode: "timestamp"}).notNull().$defaultFn(() => sql`(CURRENT_TIMESTAMP)`),
+  createdAt: integer("created_at", {mode: "timestamp"}).notNull().$defaultFn(() => sql`strftime('%s', 'now')`),
   updatedAt: integer("updated_at", {mode: "timestamp"})
     .notNull()
-    .$defaultFn(() => sql`(CURRENT_TIMESTAMP)`)
-    .$onUpdateFn(() => sql`(CURRENT_TIMESTAMP)`),
+    .$defaultFn(() => sql`strftime('%s', 'now')`)
+    .$onUpdateFn(() => sql`strftime('%s', 'now')`),
 });
 
 export const verification = sqliteTable("verification", {
@@ -68,11 +68,11 @@ export const verification = sqliteTable("verification", {
   identifier: text("identifier").notNull(),
   value: text("value").notNull(),
   expiresAt: integer("expires_at", {mode: "timestamp"}).notNull(),
-  createdAt: integer("created_at", {mode: "timestamp"}).notNull().$defaultFn(() => sql`(CURRENT_TIMESTAMP)`),
+  createdAt: integer("created_at", {mode: "timestamp"}).notNull().$defaultFn(() => sql`strftime('%s', 'now')`),
   updatedAt: integer("updated_at", {mode: "timestamp"})
     .notNull()
-    .$defaultFn(() => sql`(CURRENT_TIMESTAMP)`)
-    .$onUpdateFn(() => sql`(CURRENT_TIMESTAMP)`),
+    .$defaultFn(() => sql`strftime('%s', 'now')`)
+    .$onUpdateFn(() => sql`strftime('%s', 'now')`),
 });
 
 // ===== Application Tables =====
@@ -86,11 +86,11 @@ export const wallets = sqliteTable("wallet", {
   isDefault: integer("is_default", { mode: "boolean" }).notNull().default(false),
   isDelegated: integer("is_delegated", { mode: "boolean" }).notNull().default(false),
   balance: real("balance").notNull().default(0),
-  createdAt: integer("created_at", {mode: "timestamp"}).notNull().$defaultFn(() => sql`(CURRENT_TIMESTAMP)`),
+  createdAt: integer("created_at", {mode: "timestamp"}).notNull().$defaultFn(() => sql`strftime('%s', 'now')`),
   updatedAt: integer("updated_at", {mode: "timestamp"})
     .notNull()
-    .$defaultFn(() => sql`(CURRENT_TIMESTAMP)`)
-    .$onUpdateFn(() => sql`(CURRENT_TIMESTAMP)`),
+    .$defaultFn(() => sql`strftime('%s', 'now')`)
+    .$onUpdateFn(() => sql`strftime('%s', 'now')`),
 });
 
 export const currencies = sqliteTable("currency", {
@@ -98,11 +98,11 @@ export const currencies = sqliteTable("currency", {
   code: text("code").notNull().unique(),
   name: text("name").notNull(),
   isDefault: integer("is_default", { mode: "boolean" }).notNull().default(false),
-	createdAt: integer("created_at", {mode: "timestamp"}).notNull().$defaultFn(() => sql`(CURRENT_TIMESTAMP)`),
+	createdAt: integer("created_at", {mode: "timestamp"}).notNull().$defaultFn(() => sql`strftime('%s', 'now')`),
   updatedAt: integer("updated_at", {mode: "timestamp"})
     .notNull()
-    .$defaultFn(() => sql`(CURRENT_TIMESTAMP)`)
-    .$onUpdateFn(() => sql`(CURRENT_TIMESTAMP)`),
+    .$defaultFn(() => sql`strftime('%s', 'now')`)
+    .$onUpdateFn(() => sql`strftime('%s', 'now')`),
 });
 
 export const rates = sqliteTable("rate", {
@@ -115,11 +115,11 @@ export const rates = sqliteTable("rate", {
     .references(() => currencies.id, { onDelete: "restrict" }),
   rate: real("rate").notNull(),
   dateRate: integer("date_rate", { mode: "boolean" }).notNull(),
-  createdAt: integer("created_at", { mode: "timestamp" }).notNull().$defaultFn(() => sql`(CURRENT_TIMESTAMP)`),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull().$defaultFn(() => sql`strftime('%s', 'now')`),
 	updatedAt: integer("updated_at", {mode: "timestamp"})
     .notNull()
-    .$defaultFn(() => sql`(CURRENT_TIMESTAMP)`)
-    .$onUpdateFn(() => sql`(CURRENT_TIMESTAMP)`),
+    .$defaultFn(() => sql`strftime('%s', 'now')`)
+    .$onUpdateFn(() => sql`strftime('%s', 'now')`),
 });
 
 export const categories = sqliteTable("category", {
@@ -129,24 +129,27 @@ export const categories = sqliteTable("category", {
   color: text("color"),
   userId: text("user_id").references(() => user.id, { onDelete: "set null" }),
 	isDefault: integer("is_default", { mode: "boolean" }).notNull().default(false),
-	createdAt: integer("created_at", {mode: "timestamp"}).notNull().$defaultFn(() => sql`(CURRENT_TIMESTAMP)`),
+	createdAt: integer("created_at", {mode: "timestamp"}).notNull().$defaultFn(() => sql`strftime('%s', 'now')`),
 	updatedAt: integer("updated_at", {mode: "timestamp"})
     .notNull()
-    .$defaultFn(() => sql`(CURRENT_TIMESTAMP)`)
-    .$onUpdateFn(() => sql`(CURRENT_TIMESTAMP)`),
+    .$defaultFn(() => sql`strftime('%s', 'now')`)
+    .$onUpdateFn(() => sql`strftime('%s', 'now')`),
 });
 
 export const monthPeriods = sqliteTable("month_period", {
   id: text("id").primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
   startDate: integer("start_date", {mode: "timestamp"}).notNull(),
   endDate: integer("end_date", {mode: "timestamp"}).notNull(),
   isActive: integer("is_active", { mode: "boolean" }).notNull().default(false),
-  createdAt: integer("created_at", {mode: "timestamp"}).notNull().$defaultFn(() => sql`(CURRENT_TIMESTAMP)`),
+  createdAt: integer("created_at", {mode: "timestamp"}).notNull().$defaultFn(() => sql`strftime('%s', 'now')`),
   updatedAt: integer("updated_at", {mode: "timestamp"})
     .notNull()
-    .$defaultFn(() => sql`(CURRENT_TIMESTAMP)`)
-    .$onUpdateFn(() => sql`(CURRENT_TIMESTAMP)`),
+    .$defaultFn(() => sql`strftime('%s', 'now')`)
+    .$onUpdateFn(() => sql`strftime('%s', 'now')`),
 });
 
 export type InsertMonthPeriod = typeof monthPeriods.$inferInsert;
@@ -164,11 +167,11 @@ export const mustPayTransactions = sqliteTable("must_pay_transaction", {
     .notNull()
     .references(() => currencies.id, { onDelete: "restrict" }),
   categoryId: text("category_id").references(() => categories.id, { onDelete: "set null" }),
-  createdAt: integer("created_at", { mode: "timestamp" }).notNull().$defaultFn(() => sql`(CURRENT_TIMESTAMP)`),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull().$defaultFn(() => sql`strftime('%s', 'now')`),
   updatedAt: integer("updated_at", { mode: "timestamp" })
     .notNull()
-    .$defaultFn(() => sql`(CURRENT_TIMESTAMP)`)
-    .$onUpdateFn(() => sql`(CURRENT_TIMESTAMP)`),
+    .$defaultFn(() => sql`strftime('%s', 'now')`)
+    .$onUpdateFn(() => sql`strftime('%s', 'now')`),
 });
 
 export const transactions = sqliteTable("transaction", {
@@ -182,7 +185,7 @@ export const transactions = sqliteTable("transaction", {
   currencyId: text("currency_id")
     .notNull()
     .references(() => currencies.id, { onDelete: "restrict" }),
-  date: integer("date", { mode: "timestamp" }).notNull().$defaultFn(() => sql`(CURRENT_TIMESTAMP)`),
+  date: integer("date", { mode: "timestamp" }).notNull().$defaultFn(() => sql`strftime('%s', 'now')`),
   notes: text("notes"),
   category: text("category"),
   monthPeriodId: text("month_period_id")
@@ -196,11 +199,11 @@ export const transactions = sqliteTable("transaction", {
     () => transactionTypes.id,
     { onDelete: "set null" }
   ),
-  createdAt: integer("created_at", { mode: "timestamp" }).notNull().$defaultFn(() => sql`(CURRENT_TIMESTAMP)`),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull().$defaultFn(() => sql`strftime('%s', 'now')`),
   updatedAt: integer("updated_at", { mode: "timestamp" })
     .notNull()
-    .$defaultFn(() => sql`(CURRENT_TIMESTAMP)`)
-    .$onUpdateFn(() => sql`(CURRENT_TIMESTAMP)`),
+    .$defaultFn(() => sql`strftime('%s', 'now')`)
+    .$onUpdateFn(() => sql`strftime('%s', 'now')`),
 });
 
 export const transactionTypes = sqliteTable("transaction_type", {
@@ -210,11 +213,11 @@ export const transactionTypes = sqliteTable("transaction_type", {
     .references(() => user.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
   isDefault: integer("is_default", { mode: "boolean" }).notNull().default(false),
-  createdAt: integer("created_at", { mode: "timestamp" }).notNull().$defaultFn(() => sql`(CURRENT_TIMESTAMP)`),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull().$defaultFn(() => sql`strftime('%s', 'now')`),
   updatedAt: integer("updated_at", { mode: "timestamp" })
     .notNull()
-    .$defaultFn(() => sql`(CURRENT_TIMESTAMP)`)
-    .$onUpdateFn(() => sql`(CURRENT_TIMESTAMP)`),
+    .$defaultFn(() => sql`strftime('%s', 'now')`)
+    .$onUpdateFn(() => sql`strftime('%s', 'now')`),
 });
 
 export const withdrawFees = sqliteTable("withdraw_fee", {
@@ -222,11 +225,11 @@ export const withdrawFees = sqliteTable("withdraw_fee", {
   feeAmount: real("fee_amount").notNull(),
   name: text("name").notNull(),
   isDefault: integer("is_default", { mode: "boolean" }).notNull().default(false),
-  createdAt: integer("created_at", { mode: "timestamp" }).notNull().$defaultFn(() => sql`(CURRENT_TIMESTAMP)`),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull().$defaultFn(() => sql`strftime('%s', 'now')`),
 	updatedAt: integer("updated_at", { mode: "timestamp" })
     .notNull()
-    .$defaultFn(() => sql`(CURRENT_TIMESTAMP)`)
-    .$onUpdateFn(() => sql`(CURRENT_TIMESTAMP)`),
+    .$defaultFn(() => sql`strftime('%s', 'now')`)
+    .$onUpdateFn(() => sql`strftime('%s', 'now')`),
 });
 
 export const logs = sqliteTable("log", {
@@ -237,7 +240,7 @@ export const logs = sqliteTable("log", {
   actionType: text("action_type").$type<ActionType>().notNull(),
   message: text("message").notNull(),
   metadata: text("metadata"),
-  timestamp: integer("timestamp", { mode: "timestamp" }).notNull().$defaultFn(() => sql`(CURRENT_TIMESTAMP)`),
+  timestamp: integer("timestamp", { mode: "timestamp" }).notNull().$defaultFn(() => sql`strftime('%s', 'now')`),
 });
 
 // ===== Relations =====
@@ -245,12 +248,14 @@ export const logs = sqliteTable("log", {
 // user (1) -> account (many)
 // user (1) -> wallet (many)
 // user (1) -> category (many)
+// user (1) -> month_period (many)
 // user (1) -> log (many)
 export const userRelations = relations(user, ({ many }) => ({
   sessions: many(session),
   accounts: many(account),
   wallets: many(wallets),
   categories: many(categories),
+  monthPeriods: many(monthPeriods),
   logs: many(logs),
 }));
 
@@ -321,9 +326,14 @@ export const categoryRelations = relations(categories, ({ one, many }) => ({
   mustPayTransactions: many(mustPayTransactions),
 }));
 
+// month_period (many) -> user (1)
 // month_period (1) -> transaction (many)
 // month_period (1) -> must_pay_transaction (many)
-export const monthPeriodRelations = relations(monthPeriods, ({ many }) => ({
+export const monthPeriodRelations = relations(monthPeriods, ({ one, many }) => ({
+  user: one(user, {
+    fields: [monthPeriods.userId],
+    references: [user.id],
+  }),
   transactions: many(transactions),
   mustPayTransactions: many(mustPayTransactions),
 }));

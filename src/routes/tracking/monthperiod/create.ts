@@ -30,17 +30,15 @@ create.post('/month-periods', tbValidator('json', schema), async (c) => {
 
     const now = Date.now();
     const id = ulid();
-
-    await db.insert(monthPeriods).values({
-      id,
-      name,
-      startDate,
-      endDate,
-      isActive: isActive ?? false,
-      createdAt: now,
-      updatedAt: now,
-    }).run();
-
+		const monthPeriodData: Omit<typeof monthPeriods.$inferInsert, "createdAt" | "updatedAt"> = {
+			id,
+			userId: user.id,
+			name,
+			startDate: new Date(startDate),
+			endDate: new Date(endDate),
+			isActive: isActive ?? false,
+		};
+		await db.insert(monthPeriods).values(monthPeriodData).returning();
     const [created] = await db
       .select()
       .from(monthPeriods)

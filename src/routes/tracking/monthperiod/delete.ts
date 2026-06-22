@@ -34,6 +34,10 @@ del.delete('/month-periods', tbValidator('json', schema), async (c) => {
       client.close();
       return c.json({ success: false, message: "Month period not found", data: null } satisfies GenericResponseInterface, 404);
     }
+    if (existing.userId !== user.id) {
+      client.close();
+      return c.json({ success: false, message: "Month period does not belong to you", data: null } satisfies GenericResponseInterface, 403);
+    }
 
     const [txCount] = await db
       .select({ count: sql<number>`count(*)` })

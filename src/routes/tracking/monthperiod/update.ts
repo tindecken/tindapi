@@ -38,12 +38,16 @@ update.put('/month-periods', tbValidator('json', schema), async (c) => {
       client.close();
       return c.json({ success: false, message: "Month period not found", data: null } satisfies GenericResponseInterface, 404);
     }
+    if (existing.userId !== user.id) {
+      client.close();
+      return c.json({ success: false, message: "Month period does not belong to you", data: null } satisfies GenericResponseInterface, 403);
+    }
 
-    const now = Date.now();
+    const now = new Date();
     const updateData: Record<string, any> = { updatedAt: now };
     if (name !== undefined) updateData.name = name;
-    if (startDate !== undefined) updateData.startDate = startDate;
-    if (endDate !== undefined) updateData.endDate = endDate;
+    if (startDate !== undefined) updateData.startDate = new Date(startDate);
+    if (endDate !== undefined) updateData.endDate = new Date(endDate);
     if (isActive !== undefined) updateData.isActive = isActive;
 
     await db.update(monthPeriods)

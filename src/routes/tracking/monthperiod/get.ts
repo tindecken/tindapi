@@ -30,20 +30,18 @@ get.get('/month-periods', tbValidator('query', querySchema), async (c) => {
 
     const [countResult] = await db
       .select({ total: sql<number>`count(*)` })
-      .from(monthPeriods);
+      .from(monthPeriods)
+      .where(eq(monthPeriods.userId, user.id));
 
     const totalRecords = countResult?.total ?? 0;
-		console.log('totalRecords', totalRecords)
-		console.log('limitNumber', limitNumber)
-		console.log('pageNumber', pageNumber)
 
     const rows = await db
       .select()
       .from(monthPeriods)
-      .limit(Number(limitNumber))
+      .where(eq(monthPeriods.userId, user.id))
+      .limit(limitNumber)
       .offset(offset)
-      .orderBy(desc(monthPeriods.createdAt))
-		console.log('rows', rows)
+      .orderBy(desc(monthPeriods.createdAt));
     client.close();
 
     const res: GenericResponseInterface = {

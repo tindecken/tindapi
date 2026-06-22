@@ -80,19 +80,19 @@ async function seed() {
 
   // ── 1. Users ────────────────────────────────────────────
   const users = [
+		{
+			id: user1ID,
+			name: "Tindecken",
+			email: "tindecken@gmail.com",
+			emailVerified: true,
+			image: null
+		},
     {
-      id: user1ID,
+      id: user2ID,
       name: "Hoang Nguyen",
       email: "thaihoang85@gmail.com",
       emailVerified: true,
       image: null,
-    },
-    {
-      id: user2ID,
-      name: "Tindecken",
-      email: "tindecken@gmail.com",
-      emailVerified: true,
-      image: null
     },
   ];
   await db.insert(user).values(users).run();
@@ -225,16 +225,18 @@ async function seed() {
   const periodRows = [
     {
       id: periodId1,
+			userId: user1ID,
       name: "May 2026",
-      startDate: sql`strftime('%Y-%m-%d', '2026-05-23')`,
-      endDate: sql`strftime('%s', 'now')`,
+      startDate: sql`strftime('%s', '2026-05-23')`,
+      endDate: sql`strftime('%s', '2026-06-22')`,
       isActive: false,
     },
     {
       id: periodId2,
+			userId: user1ID,
       name: "June 2026",
-      startDate: sql`strftime('%s', '2026-05-23')`,
-      endDate: sql`(CURRENT_TIMESTAMP)`,
+      startDate: sql`strftime('%s', '2026-06-23')`,
+      endDate: sql`strftime('%s', '2026-07-22')`,
       isActive: true,
     },
   ];
