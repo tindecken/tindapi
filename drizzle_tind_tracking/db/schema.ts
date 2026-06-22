@@ -95,6 +95,9 @@ export const wallets = sqliteTable("wallet", {
 
 export const currencies = sqliteTable("currency", {
   id: text("id").primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
   code: text("code").notNull().unique(),
   name: text("name").notNull(),
   isDefault: integer("is_default", { mode: "boolean" }).notNull().default(false),
@@ -107,6 +110,9 @@ export const currencies = sqliteTable("currency", {
 
 export const rates = sqliteTable("rate", {
   id: text("id").primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
   currencyFrom: text("currency_from")
     .notNull()
     .references(() => currencies.id, { onDelete: "restrict" }),
@@ -157,6 +163,9 @@ export type SelectMonthPeriod = typeof monthPeriods.$inferSelect;
 
 export const mustPayTransactions = sqliteTable("must_pay_transaction", {
   id: text("id").primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
   monthPeriodId: text("month_period_id")
     .notNull()
     .references(() => monthPeriods.id, { onDelete: "cascade" }),
@@ -176,6 +185,9 @@ export const mustPayTransactions = sqliteTable("must_pay_transaction", {
 
 export const transactions = sqliteTable("transaction", {
   id: text("id").primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
   walletId: text("wallet_id")
     .notNull()
     .references(() => wallets.id, { onDelete: "restrict" }),
@@ -248,14 +260,24 @@ export const logs = sqliteTable("log", {
 // user (1) -> account (many)
 // user (1) -> wallet (many)
 // user (1) -> category (many)
+// user (1) -> currency (many)
+// user (1) -> rate (many)
 // user (1) -> month_period (many)
+// user (1) -> must_pay_transaction (many)
+// user (1) -> transaction (many)
+// user (1) -> transaction_type (many)
 // user (1) -> log (many)
 export const userRelations = relations(user, ({ many }) => ({
   sessions: many(session),
   accounts: many(account),
   wallets: many(wallets),
   categories: many(categories),
+  currencies: many(currencies),
+  rates: many(rates),
   monthPeriods: many(monthPeriods),
+  mustPayTransactions: many(mustPayTransactions),
+  transactions: many(transactions),
+  transactionTypes: many(transactionTypes),
   logs: many(logs),
 }));
 
@@ -289,20 +311,30 @@ export const walletRelations = relations(wallets, ({ one, many }) => ({
   incomingTransactions: many(transactions, { relationName: "toWalletTransactions" }),
 }));
 
+// currency (many) -> user (1)
 // currency (1) -> transaction (many)
 // currency (1) -> must_pay_transaction (many)
 // currency (1) -> rate (many), via currencyFrom
 // currency (1) -> rate (many), via currencyTo
-export const currencyRelations = relations(currencies, ({ many }) => ({
+export const currencyRelations = relations(currencies, ({ one, many }) => ({
+  user: one(user, {
+    fields: [currencies.userId],
+    references: [user.id],
+  }),
   transactions: many(transactions),
   mustPayTransactions: many(mustPayTransactions),
   ratesFrom: many(rates, { relationName: "currencyFromRates" }),
   ratesTo: many(rates, { relationName: "currencyToRates" }),
 }));
 
+// rate (many) -> user (1)
 // rate (many) -> currency (1), via currencyFrom
 // rate (many) -> currency (1), via currencyTo
 export const rateRelations = relations(rates, ({ one }) => ({
+  user: one(user, {
+    fields: [rates.userId],
+    references: [user.id],
+  }),
   currencyFrom: one(currencies, {
     fields: [rates.currencyFrom],
     references: [currencies.id],
@@ -338,6 +370,7 @@ export const monthPeriodRelations = relations(monthPeriods, ({ one, many }) => (
   mustPayTransactions: many(mustPayTransactions),
 }));
 
+// transaction (many) -> user (1)
 // transaction (many) -> wallet (1)
 // transaction (many) -> wallet (1), for transfers (toWallet)
 // transaction (many) -> currency (1)
@@ -345,6 +378,10 @@ export const monthPeriodRelations = relations(monthPeriods, ({ one, many }) => (
 // transaction (many) -> must_pay_transaction (1)
 // transaction (many) -> transaction_type (1)
 export const transactionRelations = relations(transactions, ({ one, many }) => ({
+  user: one(user, {
+    fields: [transactions.userId],
+    references: [user.id],
+  }),
   wallet: one(wallets, {
     fields: [transactions.walletId],
     references: [wallets.id],
@@ -373,11 +410,16 @@ export const transactionRelations = relations(transactions, ({ one, many }) => (
   }),
 }));
 
+// must_pay_transaction (many) -> user (1)
 // must_pay_transaction (many) -> month_period (1)
 // must_pay_transaction (many) -> currency (1)
 // must_pay_transaction (many) -> category (1)
 // must_pay_transaction (1) -> transaction (many)
 export const mustPayTransactionRelations = relations(mustPayTransactions, ({ one, many }) => ({
+  user: one(user, {
+    fields: [mustPayTransactions.userId],
+    references: [user.id],
+  }),
   monthPeriod: one(monthPeriods, {
     fields: [mustPayTransactions.monthPeriodId],
     references: [monthPeriods.id],

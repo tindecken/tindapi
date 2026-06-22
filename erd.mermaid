@@ -1,0 +1,188 @@
+erDiagram
+  user {
+    string id PK
+    string name
+    string email
+    number email_verified
+    string image
+    number created_at
+    number updated_at
+  }
+  session {
+    string id PK
+    string user_id FK
+    string token
+    number expires_at
+    string ip_address
+    string user_agent
+    number created_at
+    number updated_at
+  }
+  account {
+    string id PK
+    string user_id FK
+    string account_id
+    string provider_id
+    string access_token
+    string refresh_token
+    number access_token_expires_at
+    number refresh_token_expires_at
+    string scope
+    string id_token
+    string password
+    number created_at
+    number updated_at
+  }
+  verification {
+    string id PK
+    string identifier
+    string value
+    number expires_at
+    number created_at
+    number updated_at
+  }
+  wallet {
+    string id PK
+    string user_id FK
+    string name
+    number is_default
+    number is_delegated
+    number balance
+    number created_at
+    number updated_at
+  }
+  currency {
+    string id PK
+    string user_id FK
+    string code
+    string name
+    number is_default
+    number created_at
+    number updated_at
+  }
+  rate {
+    string id PK
+    string user_id FK
+    string currency_from FK
+    string currency_to FK
+    number rate
+    number date_rate
+    number created_at
+    number updated_at
+  }
+  category {
+    string id PK
+    string name
+    string icon
+    string color
+    string user_id FK
+    number is_default
+    number created_at
+    number updated_at
+  }
+  month_period {
+    string id PK
+    string user_id FK
+    string name
+    number start_date
+    number end_date
+    number is_active
+    number created_at
+    number updated_at
+  }
+  must_pay_transaction {
+    string id PK
+    string user_id FK
+    string month_period_id FK
+    string name
+    number target_amount
+    number remaining_amount
+    string currency_id FK
+    string category_id FK
+    number created_at
+    number updated_at
+  }
+  transaction {
+    string id PK
+    string user_id FK
+    string wallet_id FK
+    string to_wallet_id FK
+    number amount
+    number fee
+    string currency_id FK
+    number date
+    string notes
+    string category
+    string month_period_id FK
+    string must_pay_transaction_id FK
+    string transaction_type_id FK
+    number created_at
+    number updated_at
+  }
+  transaction_type {
+    string id PK
+    string user_id FK
+    string name
+    number is_default
+    number created_at
+    number updated_at
+  }
+  withdraw_fee {
+    string id PK
+    number fee_amount
+    string name
+    number is_default
+    number created_at
+    number updated_at
+  }
+  log {
+    string id PK
+    string user_id FK
+    string action_type
+    string message
+    string metadata
+    number timestamp
+  }
+
+  user ||--o{ session : ""
+  user ||--o{ account : ""
+  user ||--o{ wallet : ""
+  user ||--o{ currency : ""
+  user ||--o{ rate : ""
+  user ||--o{ category : ""
+  user ||--o{ month_period : ""
+  user ||--o{ must_pay_transaction : ""
+  user ||--o{ transaction : ""
+  user ||--o{ transaction_type : ""
+  user ||--o{ log : ""
+  session }o--|| user : ""
+  account }o--|| user : ""
+  wallet }o--|| user : ""
+  wallet ||--o{ transaction : "wallet_id"
+  wallet ||--o{ transaction : "to_wallet_id"
+  currency }o--|| user : ""
+  currency ||--o{ transaction : ""
+  currency ||--o{ must_pay_transaction : ""
+  currency ||--o{ rate : "currency_from"
+  currency ||--o{ rate : "currency_to"
+  rate }o--|| user : ""
+  rate }o--|| currency : "currency_from"
+  rate }o--|| currency : "currency_to"
+  category }o--|| user : ""
+  month_period }o--|| user : ""
+  month_period ||--o{ transaction : ""
+  month_period ||--o{ must_pay_transaction : ""
+  must_pay_transaction }o--|| user : ""
+  must_pay_transaction }o--|| month_period : ""
+  must_pay_transaction }o--|| currency : ""
+  must_pay_transaction }o--|| category : ""
+  must_pay_transaction ||--o{ transaction : ""
+  transaction }o--|| user : ""
+  transaction }o--|| wallet : "wallet_id"
+  transaction }o--|| wallet : "to_wallet_id"
+  transaction }o--|| currency : ""
+  transaction }o--|| month_period : ""
+  transaction }o--|| must_pay_transaction : ""
+  transaction }o--|| transaction_type : ""
+  transaction_type }o--|| user : ""
+  transaction_type ||--o{ transaction : ""

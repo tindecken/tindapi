@@ -25,6 +25,7 @@ import { create as createMonthPeriod } from './routes/tracking/monthperiod/creat
 import { get as getMonthPeriod } from './routes/tracking/monthperiod/get';
 import { update as updateMonthPeriod } from './routes/tracking/monthperiod/update';
 import { del as deleteMonthPeriod } from './routes/tracking/monthperiod/delete';
+import { get as getCurrentMonthPeriod } from './routes/tracking/monthperiod/getCurrentMonthPeriod';
 
 type Variables = {
   user: {
@@ -151,5 +152,6 @@ app.route("/tind_tracking", createMonthPeriod);
 app.route("/tind_tracking", getMonthPeriod);
 app.route("/tind_tracking", updateMonthPeriod);
 app.route("/tind_tracking", deleteMonthPeriod);
+app.route("/tind_tracking", getCurrentMonthPeriod);
 
 export default app;
