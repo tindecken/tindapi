@@ -10,8 +10,8 @@ import { getAuthenticatedUserInfo } from "../../../auth/getAuthenticatedUser";
 export const get = new Hono<{ Bindings: Env }>();
 
 const querySchema = Type.Object({
-  page: Type.Optional(Type.Number()),
-  limit: Type.Optional(Type.Number()),
+  page: Type.Optional(Type.String()),
+  limit: Type.Optional(Type.String()),
 })
 
 get.get('/month-periods', tbValidator('query', querySchema), async (c) => {
@@ -21,8 +21,10 @@ get.get('/month-periods', tbValidator('query', querySchema), async (c) => {
       return c.json({ success: false, message: "Unauthorized", data: null } satisfies GenericResponseInterface, 401);
     }
 
-    const { page = 1, limit = 10 } = c.req.valid('query');
-    const offset = (page - 1) * limit;
+    const { page = "1", limit = "10" } = c.req.valid('query');
+    const pageNumber = Number(page);
+    const limitNumber = Number(limit);
+    const offset = (pageNumber - 1) * limitNumber;
 
     const { db, client } = createDbClient(c.env);
 
@@ -31,14 +33,17 @@ get.get('/month-periods', tbValidator('query', querySchema), async (c) => {
       .from(monthPeriods);
 
     const totalRecords = countResult?.total ?? 0;
+		console.log('totalRecords', totalRecords)
+		console.log('limitNumber', limitNumber)
+		console.log('pageNumber', pageNumber)
 
     const rows = await db
       .select()
       .from(monthPeriods)
-      .orderBy(desc(monthPeriods.updatedAt))
-      .limit(limit)
-      .offset(offset);
-
+      .limit(Number(limitNumber))
+      .offset(offset)
+      .orderBy(desc(monthPeriods.createdAt))
+		console.log('rows', rows)
     client.close();
 
     const res: GenericResponseInterface = {

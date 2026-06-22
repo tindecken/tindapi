@@ -19,8 +19,8 @@ export const user = sqliteTable("user", {
   email: text("email").notNull().unique(),
   emailVerified: integer("email_verified", { mode: "boolean" }).notNull(),
   image: text("image"),
-  createdAt: integer("created_at").notNull().$defaultFn(() => sql`(CURRENT_TIMESTAMP)`),
-  updatedAt: integer("updated_at")
+  createdAt: integer("created_at", {mode: "timestamp"}).notNull().$defaultFn(() => sql`(CURRENT_TIMESTAMP)`),
+  updatedAt: integer("updated_at", {mode: "timestamp"})
     .notNull()
     .$defaultFn(() => sql`(CURRENT_TIMESTAMP)`)
     .$onUpdateFn(() => sql`(CURRENT_TIMESTAMP)`),
@@ -32,11 +32,11 @@ export const session = sqliteTable("session", {
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
   token: text("token").notNull(),
-  expiresAt: integer("expires_at").notNull(),
+  expiresAt: integer("expires_at", {mode: "timestamp"}).notNull(),
   ipAddress: text("ip_address"),
   userAgent: text("user_agent"),
-  createdAt: integer("created_at").notNull().$defaultFn(() => sql`(CURRENT_TIMESTAMP)`),
-  updatedAt: integer("updated_at")
+  createdAt: integer("created_at", {mode: "timestamp"}).notNull().$defaultFn(() => sql`(CURRENT_TIMESTAMP)`),
+  updatedAt: integer("updated_at", {mode: "timestamp"})
     .notNull()
     .$defaultFn(() => sql`(CURRENT_TIMESTAMP)`)
     .$onUpdateFn(() => sql`(CURRENT_TIMESTAMP)`),
@@ -51,13 +51,13 @@ export const account = sqliteTable("account", {
   providerId: text("provider_id").notNull(),
   accessToken: text("access_token"),
   refreshToken: text("refresh_token"),
-  accessTokenExpiresAt: integer("access_token_expires_at"),
-  refreshTokenExpiresAt: integer("refresh_token_expires_at"),
+  accessTokenExpiresAt: integer("access_token_expires_at", {mode: "timestamp"}),
+  refreshTokenExpiresAt: integer("refresh_token_expires_at", {mode: "timestamp"}),
   scope: text("scope"),
   idToken: text("id_token"),
   password: text("password"),
-  createdAt: integer("created_at").notNull().$defaultFn(() => sql`(CURRENT_TIMESTAMP)`),
-  updatedAt: integer("updated_at")
+  createdAt: integer("created_at", {mode: "timestamp"}).notNull().$defaultFn(() => sql`(CURRENT_TIMESTAMP)`),
+  updatedAt: integer("updated_at", {mode: "timestamp"})
     .notNull()
     .$defaultFn(() => sql`(CURRENT_TIMESTAMP)`)
     .$onUpdateFn(() => sql`(CURRENT_TIMESTAMP)`),
@@ -67,9 +67,9 @@ export const verification = sqliteTable("verification", {
   id: text("id").primaryKey(),
   identifier: text("identifier").notNull(),
   value: text("value").notNull(),
-  expiresAt: integer("expires_at").notNull(),
-  createdAt: integer("created_at").notNull().$defaultFn(() => sql`(CURRENT_TIMESTAMP)`),
-  updatedAt: integer("updated_at")
+  expiresAt: integer("expires_at", {mode: "timestamp"}).notNull(),
+  createdAt: integer("created_at", {mode: "timestamp"}).notNull().$defaultFn(() => sql`(CURRENT_TIMESTAMP)`),
+  updatedAt: integer("updated_at", {mode: "timestamp"})
     .notNull()
     .$defaultFn(() => sql`(CURRENT_TIMESTAMP)`)
     .$onUpdateFn(() => sql`(CURRENT_TIMESTAMP)`),
@@ -86,8 +86,8 @@ export const wallets = sqliteTable("wallet", {
   isDefault: integer("is_default", { mode: "boolean" }).notNull().default(false),
   isDelegated: integer("is_delegated", { mode: "boolean" }).notNull().default(false),
   balance: real("balance").notNull().default(0),
-  createdAt: integer("created_at").notNull().$defaultFn(() => sql`(CURRENT_TIMESTAMP)`),
-  updatedAt: integer("updated_at")
+  createdAt: integer("created_at", {mode: "timestamp"}).notNull().$defaultFn(() => sql`(CURRENT_TIMESTAMP)`),
+  updatedAt: integer("updated_at", {mode: "timestamp"})
     .notNull()
     .$defaultFn(() => sql`(CURRENT_TIMESTAMP)`)
     .$onUpdateFn(() => sql`(CURRENT_TIMESTAMP)`),
@@ -98,6 +98,11 @@ export const currencies = sqliteTable("currency", {
   code: text("code").notNull().unique(),
   name: text("name").notNull(),
   isDefault: integer("is_default", { mode: "boolean" }).notNull().default(false),
+	createdAt: integer("created_at", {mode: "timestamp"}).notNull().$defaultFn(() => sql`(CURRENT_TIMESTAMP)`),
+  updatedAt: integer("updated_at", {mode: "timestamp"})
+    .notNull()
+    .$defaultFn(() => sql`(CURRENT_TIMESTAMP)`)
+    .$onUpdateFn(() => sql`(CURRENT_TIMESTAMP)`),
 });
 
 export const rates = sqliteTable("rate", {
@@ -109,8 +114,12 @@ export const rates = sqliteTable("rate", {
     .notNull()
     .references(() => currencies.id, { onDelete: "restrict" }),
   rate: real("rate").notNull(),
-  dateRate: integer("date_rate").notNull(),
-  createdAt: integer("created_at").notNull().$defaultFn(() => sql`(CURRENT_TIMESTAMP)`),
+  dateRate: integer("date_rate", { mode: "boolean" }).notNull(),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull().$defaultFn(() => sql`(CURRENT_TIMESTAMP)`),
+	updatedAt: integer("updated_at", {mode: "timestamp"})
+    .notNull()
+    .$defaultFn(() => sql`(CURRENT_TIMESTAMP)`)
+    .$onUpdateFn(() => sql`(CURRENT_TIMESTAMP)`),
 });
 
 export const categories = sqliteTable("category", {
@@ -120,8 +129,8 @@ export const categories = sqliteTable("category", {
   color: text("color"),
   userId: text("user_id").references(() => user.id, { onDelete: "set null" }),
 	isDefault: integer("is_default", { mode: "boolean" }).notNull().default(false),
-	createdAt: integer("created_at").notNull().$defaultFn(() => sql`(CURRENT_TIMESTAMP)`),
-	updatedAt: integer("updated_at")
+	createdAt: integer("created_at", {mode: "timestamp"}).notNull().$defaultFn(() => sql`(CURRENT_TIMESTAMP)`),
+	updatedAt: integer("updated_at", {mode: "timestamp"})
     .notNull()
     .$defaultFn(() => sql`(CURRENT_TIMESTAMP)`)
     .$onUpdateFn(() => sql`(CURRENT_TIMESTAMP)`),
@@ -130,11 +139,11 @@ export const categories = sqliteTable("category", {
 export const monthPeriods = sqliteTable("month_period", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
-  startDate: integer("start_date").notNull(),
-  endDate: integer("end_date").notNull(),
+  startDate: integer("start_date", {mode: "timestamp"}).notNull(),
+  endDate: integer("end_date", {mode: "timestamp"}).notNull(),
   isActive: integer("is_active", { mode: "boolean" }).notNull().default(false),
-  createdAt: integer("created_at").notNull().$defaultFn(() => sql`(CURRENT_TIMESTAMP)`),
-  updatedAt: integer("updated_at")
+  createdAt: integer("created_at", {mode: "timestamp"}).notNull().$defaultFn(() => sql`(CURRENT_TIMESTAMP)`),
+  updatedAt: integer("updated_at", {mode: "timestamp"})
     .notNull()
     .$defaultFn(() => sql`(CURRENT_TIMESTAMP)`)
     .$onUpdateFn(() => sql`(CURRENT_TIMESTAMP)`),
@@ -155,9 +164,8 @@ export const mustPayTransactions = sqliteTable("must_pay_transaction", {
     .notNull()
     .references(() => currencies.id, { onDelete: "restrict" }),
   categoryId: text("category_id").references(() => categories.id, { onDelete: "set null" }),
-  sortOrder: integer("sort_order").notNull().default(0),
-  createdAt: integer("created_at").notNull().$defaultFn(() => sql`(CURRENT_TIMESTAMP)`),
-  updatedAt: integer("updated_at")
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull().$defaultFn(() => sql`(CURRENT_TIMESTAMP)`),
+  updatedAt: integer("updated_at", { mode: "timestamp" })
     .notNull()
     .$defaultFn(() => sql`(CURRENT_TIMESTAMP)`)
     .$onUpdateFn(() => sql`(CURRENT_TIMESTAMP)`),
@@ -174,7 +182,7 @@ export const transactions = sqliteTable("transaction", {
   currencyId: text("currency_id")
     .notNull()
     .references(() => currencies.id, { onDelete: "restrict" }),
-  date: integer("timestamp").notNull().$defaultFn(() => sql`(CURRENT_TIMESTAMP)`),
+  date: integer("date", { mode: "timestamp" }).notNull().$defaultFn(() => sql`(CURRENT_TIMESTAMP)`),
   notes: text("notes"),
   category: text("category"),
   monthPeriodId: text("month_period_id")
@@ -188,8 +196,8 @@ export const transactions = sqliteTable("transaction", {
     () => transactionTypes.id,
     { onDelete: "set null" }
   ),
-  createdAt: integer("created_at").notNull().$defaultFn(() => sql`(CURRENT_TIMESTAMP)`),
-  updatedAt: integer("updated_at")
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull().$defaultFn(() => sql`(CURRENT_TIMESTAMP)`),
+  updatedAt: integer("updated_at", { mode: "timestamp" })
     .notNull()
     .$defaultFn(() => sql`(CURRENT_TIMESTAMP)`)
     .$onUpdateFn(() => sql`(CURRENT_TIMESTAMP)`),
@@ -202,8 +210,8 @@ export const transactionTypes = sqliteTable("transaction_type", {
     .references(() => user.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
   isDefault: integer("is_default", { mode: "boolean" }).notNull().default(false),
-  createdAt: integer("created_at").notNull().$defaultFn(() => sql`(CURRENT_TIMESTAMP)`),
-  updatedAt: integer("updated_at")
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull().$defaultFn(() => sql`(CURRENT_TIMESTAMP)`),
+  updatedAt: integer("updated_at", { mode: "timestamp" })
     .notNull()
     .$defaultFn(() => sql`(CURRENT_TIMESTAMP)`)
     .$onUpdateFn(() => sql`(CURRENT_TIMESTAMP)`),
@@ -214,7 +222,11 @@ export const withdrawFees = sqliteTable("withdraw_fee", {
   feeAmount: real("fee_amount").notNull(),
   name: text("name").notNull(),
   isDefault: integer("is_default", { mode: "boolean" }).notNull().default(false),
-  createdAt: integer("created_at").notNull().$defaultFn(() => sql`(CURRENT_TIMESTAMP)`),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull().$defaultFn(() => sql`(CURRENT_TIMESTAMP)`),
+	updatedAt: integer("updated_at", { mode: "timestamp" })
+    .notNull()
+    .$defaultFn(() => sql`(CURRENT_TIMESTAMP)`)
+    .$onUpdateFn(() => sql`(CURRENT_TIMESTAMP)`),
 });
 
 export const logs = sqliteTable("log", {
@@ -225,7 +237,7 @@ export const logs = sqliteTable("log", {
   actionType: text("action_type").$type<ActionType>().notNull(),
   message: text("message").notNull(),
   metadata: text("metadata"),
-  timestamp: integer("timestamp").notNull().$defaultFn(() => sql`(CURRENT_TIMESTAMP)`),
+  timestamp: integer("timestamp", { mode: "timestamp" }).notNull().$defaultFn(() => sql`(CURRENT_TIMESTAMP)`),
 });
 
 // ===== Relations =====
@@ -394,3 +406,4 @@ export const logRelations = relations(logs, ({ one }) => ({
 
 // Export types
 export type InsertTransaction = typeof transactions.$inferInsert;
+export type InsertMustPayTransaction = typeof mustPayTransactions.$inferInsert;

@@ -146,10 +146,10 @@ app.route("/database", addLog);
 app.route("/supabase", getPostsBySecretName);
 app.route("/supabase", createPost);
 app.route("/supabase", testSupabase);
-app.route("/tracking", transfer);
-app.route("/tracking", createMonthPeriod);
-app.route("/tracking", getMonthPeriod);
-app.route("/tracking", updateMonthPeriod);
-app.route("/tracking", deleteMonthPeriod);
+app.route("/tind_tracking", transfer);
+app.route("/tind_tracking", createMonthPeriod);
+app.route("/tind_tracking", getMonthPeriod);
+app.route("/tind_tracking", updateMonthPeriod);
+app.route("/tind_tracking", deleteMonthPeriod);
 
 export default app;

@@ -20,14 +20,15 @@ import {
   withdrawFees,
   logs,
 	transactionTypes,
+	InsertMustPayTransaction,
 } from "./schema";
 
 
 
 // ── Helpers ──────────────────────────────────────────────
 
-const ms = (year: number, month: number, day: number): number =>
-  new Date(year, month - 1, day).getTime();
+const ms = (year: number, month: number, day: number): Date =>
+  new Date(year, month - 1, day);
 
 const now = sql`(CURRENT_TIMESTAMP)`;
 
@@ -85,17 +86,13 @@ async function seed() {
       email: "thaihoang85@gmail.com",
       emailVerified: true,
       image: null,
-      createdAt: ms(2026, 4, 1),
-      updatedAt: ms(2026, 4, 1),
     },
     {
       id: user2ID,
       name: "Tindecken",
       email: "tindecken@gmail.com",
       emailVerified: true,
-      image: null,
-      createdAt: ms(2026, 4, 1),
-      updatedAt: ms(2026, 4, 1),
+      image: null
     },
   ];
   await db.insert(user).values(users).run();
@@ -196,13 +193,14 @@ async function seed() {
 	const walletId3 = ulid();
 	const walletId4 = ulid();
 	const walletId5 = ulid();
+	const walletId6 = ulid();
   const walletRows = [
-    { id: walletId1, userId: user1ID, name: "ATM", isDefault: true, isDelegated: false, balance: 0, createdAt: ms(2026, 4, 1), updatedAt: ms(2026, 4, 1) },
-    { id: walletId2, userId: user1ID, name: "Cash", isDefault: false, isDelegated: false, balance: 0, createdAt: ms(2026, 4, 1), updatedAt: ms(2026, 4, 1) },
-    { id: walletId3, userId: user1ID, name: "HSBC", isDefault: false, isDelegated: false, balance: 0, createdAt: ms(2026, 4, 1), updatedAt: ms(2026, 4, 1) },
-    { id: walletId3, userId: user1ID, name: "Momo", isDefault: false, isDelegated: false, balance: 0, createdAt: ms(2026, 4, 1), updatedAt: ms(2026, 4, 1) },
-    { id: walletId4, userId: user1ID, name: "Nhi", isDefault: false, isDelegated: true, balance: 0, createdAt: ms(2026, 4, 1), updatedAt: ms(2026, 4, 1) },
-    { id: walletId5, userId: user2ID, name: "Jane's ATM", isDefault: true, isDelegated: false, balance: 0, createdAt: ms(2026, 4, 1), updatedAt: ms(2026, 4, 1) },
+    { id: walletId1, userId: user1ID, name: "ATM", isDefault: true, isDelegated: false, balance: 0 },
+    { id: walletId2, userId: user1ID, name: "Cash", isDefault: false, isDelegated: false, balance: 0 },
+    { id: walletId3, userId: user1ID, name: "HSBC", isDefault: false, isDelegated: false, balance: 0 },
+    { id: walletId4, userId: user1ID, name: "Momo", isDefault: false, isDelegated: false, balance: 0 },
+    { id: walletId5, userId: user1ID, name: "Nhi", isDefault: false, isDelegated: true, balance: 0 },
+    { id: walletId6, userId: user2ID, name: "Jane's ATM", isDefault: true, isDelegated: false, balance: 0 },
   ];
   await db.insert(wallets).values(walletRows).run();
   console.log(`  ✓ Wallets: ${walletRows.length}`);
@@ -213,10 +211,10 @@ async function seed() {
 	const transactionTypeId3 = ulid();
 	const transactionTypeId4 = ulid();
 	const transactionTypeRows = [
-		{ id: transactionTypeId1, name: "standard", userId: user1ID, createdAt: now, updatedAt: now, isDefault: true },
-		{ id: transactionTypeId2, name: "reconciliation", userId: user1ID, createdAt: now, updatedAt: now },
-		{ id: transactionTypeId3, name: "must_pay", userId: user1ID, createdAt: now, updatedAt: now },
-		{ id: transactionTypeId4, name: "transfer", userId: user1ID, createdAt: now, updatedAt: now },
+		{ id: transactionTypeId1, name: "standard", userId: user1ID, isDefault: true },
+		{ id: transactionTypeId2, name: "reconciliation", userId: user1ID },
+		{ id: transactionTypeId3, name: "must_pay", userId: user1ID },
+		{ id: transactionTypeId4, name: "transfer", userId: user1ID },
 	];
 	await db.insert(transactionTypes).values(transactionTypeRows).run();
 	console.log(`  ✓ Transaction Types: ${transactionTypeRows.length}`);
@@ -228,18 +226,16 @@ async function seed() {
     {
       id: periodId1,
       name: "May 2026",
-      startDate: ms(2026, 4, 28),
-      endDate: ms(2026, 5, 22),
+      startDate: sql`strftime('%Y-%m-%d', 'now')`,
+      endDate: sql`strftime('%Y-%m-%d %H:%M:%S', 'now')`,
       isActive: false,
-      createdAt: ms(2026, 4, 28),
     },
     {
       id: periodId2,
       name: "June 2026",
-      startDate: ms(2026, 5, 28),
-      endDate: ms(2026, 6, 22),
+      startDate: sql`strftime('%s', '2026-05-23')`,
+      endDate: sql`(CURRENT_TIMESTAMP)`,
       isActive: true,
-      createdAt: ms(2026, 5, 28),
     },
   ];
   await db.insert(monthPeriods).values(periodRows).run();
@@ -255,9 +251,6 @@ async function seed() {
       remainingAmount: 3_000_000,
       currencyId: currencyId1,
       categoryId: categoryId1,
-      sortOrder: 1,
-      createdAt: ms(2026, 5, 28),
-      updatedAt: ms(2026, 5, 28),
     },
     {
       id: ulid(),
@@ -267,9 +260,6 @@ async function seed() {
       remainingAmount: 500_000,
       currencyId: currencyId1,
       categoryId: categoryId1,
-      sortOrder: 2,
-      createdAt: ms(2026, 5, 28),
-      updatedAt: ms(2026, 5, 28),
     },
     {
       id: ulid(),
@@ -279,9 +269,6 @@ async function seed() {
       remainingAmount: 200_000,
       currencyId: currencyId1,
       categoryId: categoryId1,
-      sortOrder: 3,
-      createdAt: ms(2026, 5, 28),
-      updatedAt: ms(2026, 5, 28),
     },
     {
       id: ulid(),
@@ -291,9 +278,6 @@ async function seed() {
       remainingAmount: 300_000,
       currencyId: currencyId1,
       categoryId: categoryId1,
-      sortOrder: 4,
-      createdAt: ms(2026, 5, 28),
-      updatedAt: ms(2026, 5, 28),
     },
     {
       id: ulid(),
@@ -303,9 +287,6 @@ async function seed() {
       remainingAmount: 1_000_000,
       currencyId: currencyId1,
       categoryId: categoryId1,
-      sortOrder: 5,
-      createdAt: ms(2026, 5, 28),
-      updatedAt: ms(2026, 5, 28),
     },
     {
       id: ulid(),
@@ -315,9 +296,6 @@ async function seed() {
       remainingAmount: 0,
       currencyId: currencyId1,
       categoryId: null,
-      sortOrder: 6,
-      createdAt: ms(2026, 5, 28),
-      updatedAt: ms(2026, 5, 28),
     },
     // May period items
     {
@@ -328,9 +306,6 @@ async function seed() {
       remainingAmount: 0,
       currencyId: currencyId1,
       categoryId: categoryId1,
-      sortOrder: 1,
-      createdAt: ms(2026, 4, 28),
-      updatedAt: ms(2026, 4, 28),
     },
     {
       id: ulid(),
@@ -340,9 +315,6 @@ async function seed() {
       remainingAmount: 0,
       currencyId: currencyId1,
       categoryId: null,
-      sortOrder: 2,
-      createdAt: ms(2026, 4, 28),
-      updatedAt: ms(2026, 4, 28),
     },
   ];
   await db.insert(mustPayTransactions).values(mustPayRows).run();

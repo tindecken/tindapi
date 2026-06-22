@@ -9,19 +9,26 @@ import { createDbClient } from "../../../../drizzle_tind_tracking/db/dbClient";
 import { getAuthenticatedUserInfo } from "../../../auth/getAuthenticatedUser";
 
 
+// Route: POST /transfer
+// Transfers an amount between two wallets owned by the authenticated user.
+// Resolves default month period and currency when not explicitly provided.
+
 export const transfer = new Hono<{ Bindings: Env }>();
 const schema = Type.Object({
-  fromWalletId: Type.String(),
-  toWalletId: Type.String(),
-  amount: Type.Number(),
-  fee: Type.Optional(Type.Number()),
-  currencyId: Type.Optional(Type.String()),
-  monthPeriodId: Type.Optional(Type.String()),
+  fromWalletId: Type.String(), // source wallet
+  toWalletId: Type.String(),   // destination wallet
+  amount: Type.Number(),       // transfer amount
+  fee: Type.Optional(Type.Number()),           // optional fee deducted from source
+  currencyId: Type.Optional(Type.String()),     // defaults to active default currency
+  monthPeriodId: Type.Optional(Type.String()),  // defaults to active month period
   notes: Type.Optional(Type.String()),
 })
 
 transfer.post('/transfer', tbValidator('json', schema), async (c) => {
   try {
+    // ----------------------------------------------------------------
+    // Authentication
+    // ----------------------------------------------------------------
     const user = getAuthenticatedUserInfo(c);
 		if(!user) {
 			const response: GenericResponseInterface = {
@@ -33,6 +40,9 @@ transfer.post('/transfer', tbValidator('json', schema), async (c) => {
 		}
     const { fromWalletId, toWalletId, amount, fee, currencyId, monthPeriodId, notes } = c.req.valid('json');
 
+    // ----------------------------------------------------------------
+    // Basic input validation
+    // ----------------------------------------------------------------
     if (fromWalletId === toWalletId) {
       return c.json({ success: false, message: "Cannot transfer to the same wallet", data: null } satisfies GenericResponseInterface, 400);
     }
@@ -40,8 +50,14 @@ transfer.post('/transfer', tbValidator('json', schema), async (c) => {
       return c.json({ success: false, message: "Amount must be positive", data: null } satisfies GenericResponseInterface, 400);
     }
 
+    // ----------------------------------------------------------------
+    // Database client
+    // ----------------------------------------------------------------
     const { db, client } = createDbClient(c.env);
 
+    // ----------------------------------------------------------------
+    // Resolve month period
+    // ----------------------------------------------------------------
     let resolvedMonthPeriodId = monthPeriodId;
     if (!resolvedMonthPeriodId) {
       const [activePeriod] = await db
@@ -57,6 +73,9 @@ transfer.post('/transfer', tbValidator('json', schema), async (c) => {
       }
     }
 
+    // ----------------------------------------------------------------
+    // Resolve currency
+    // ----------------------------------------------------------------
     let resolvedCurrencyId = currencyId;
     if (!resolvedCurrencyId) {
       const [defaultCurrency] = await db
@@ -71,6 +90,9 @@ transfer.post('/transfer', tbValidator('json', schema), async (c) => {
       }
     }
 
+    // ----------------------------------------------------------------
+    // Wallet validation
+    // ----------------------------------------------------------------
     const [fromWallet] = await db
       .select()
       .from(wallets)
@@ -97,6 +119,9 @@ transfer.post('/transfer', tbValidator('json', schema), async (c) => {
       return c.json({ success: false, message: "Destination wallet does not belong to you", data: null } satisfies GenericResponseInterface, 403);
     }
 
+    // ----------------------------------------------------------------
+    // Balance check
+    // ----------------------------------------------------------------
     const totalDeduction = amount + (fee ?? 0);
     if (fromWallet.balance < totalDeduction) {
       return c.json({
@@ -107,7 +132,10 @@ transfer.post('/transfer', tbValidator('json', schema), async (c) => {
     }
     const fromNewBalance = fromWallet.balance - totalDeduction;
     const toNewBalance = toWallet.balance + amount;
-		// get transactionTypeId for "transfer" type
+
+    // ----------------------------------------------------------------
+    // Create transaction record
+    // ----------------------------------------------------------------
 		const [transferTransactionType] = await db
 			.select()
 			.from(transactionTypes)
@@ -132,6 +160,9 @@ transfer.post('/transfer', tbValidator('json', schema), async (c) => {
 		}
     await db.insert(transactions).values(transactionData).returning();
 
+    // ----------------------------------------------------------------
+    // Update wallet balances
+    // ----------------------------------------------------------------
     await db.update(wallets)
       .set({ balance: fromNewBalance })
       .where(eq(wallets.id, fromWalletId))
@@ -144,6 +175,9 @@ transfer.post('/transfer', tbValidator('json', schema), async (c) => {
 
     client.close();
 
+    // ----------------------------------------------------------------
+    // Success response
+    // ----------------------------------------------------------------
     const res: GenericResponseInterface = {
       success: true,
       message: "Transfer successful",
@@ -158,6 +192,9 @@ transfer.post('/transfer', tbValidator('json', schema), async (c) => {
     };
     return c.json(res, 200);
   } catch (error: any) {
+    // ----------------------------------------------------------------
+    // Error handling
+    // ----------------------------------------------------------------
     const response: GenericResponseInterface = {
       success: false,
       message: error

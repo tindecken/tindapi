@@ -18,7 +18,7 @@ export function getAuth(env: Env) {
 		appName: 'TindAPI',
 		secret: env.BETTER_AUTH_SECRET,
 		baseURL: env.BETTER_AUTH_URL,
-		basePath: '/tracking/auth',
+		basePath: '/tind_tracking/auth',
 		database: drizzleAdapter(db, {
 			provider: 'sqlite',
 		}),
