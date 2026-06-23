@@ -120,7 +120,7 @@ export const rates = sqliteTable("rate", {
     .notNull()
     .references(() => currencies.id, { onDelete: "restrict" }),
   rate: real("rate").notNull(),
-  dateRate: integer("date_rate", { mode: "boolean" }).notNull(),
+  dateRate: integer("date_rate", { mode: "timestamp" }).notNull(),
   createdAt: integer("created_at", { mode: "timestamp" }).notNull().$defaultFn(() => sql`strftime('%s', 'now')`),
 	updatedAt: integer("updated_at", {mode: "timestamp"})
     .notNull()

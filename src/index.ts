@@ -26,6 +26,11 @@ import { get as getMonthPeriod } from './routes/tracking/monthperiod/get';
 import { update as updateMonthPeriod } from './routes/tracking/monthperiod/update';
 import { del as deleteMonthPeriod } from './routes/tracking/monthperiod/delete';
 import { get as getCurrentMonthPeriod } from './routes/tracking/monthperiod/getCurrentMonthPeriod';
+import { create as createRate } from './routes/tracking/rate/create';
+import { get as getRates } from './routes/tracking/rate/get';
+import { update as updateRate } from './routes/tracking/rate/update';
+import { del as deleteRate } from './routes/tracking/rate/delete';
+import { get as getLatestRate } from './routes/tracking/rate/getLatestRateOfCurrencyPair';
 
 type Variables = {
   user: {
@@ -153,5 +158,10 @@ app.route("/tind_tracking", getMonthPeriod);
 app.route("/tind_tracking", updateMonthPeriod);
 app.route("/tind_tracking", deleteMonthPeriod);
 app.route("/tind_tracking", getCurrentMonthPeriod);
+app.route("/tind_tracking", createRate);
+app.route("/tind_tracking", getRates);
+app.route("/tind_tracking", updateRate);
+app.route("/tind_tracking", deleteRate);
+app.route("/tind_tracking", getLatestRate);
 
 export default app;
