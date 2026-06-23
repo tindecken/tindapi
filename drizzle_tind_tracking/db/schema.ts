@@ -130,7 +130,8 @@ export const rates = sqliteTable("rate", {
 
 export const categories = sqliteTable("category", {
   id: text("id").primaryKey(),
-  name: text("name").notNull().unique(),
+  name: text("name").notNull(),
+	note: text("note"),
   icon: text("icon"),
   color: text("color"),
   userId: text("user_id").references(() => user.id, { onDelete: "set null" }),
@@ -198,7 +199,7 @@ export const transactions = sqliteTable("transaction", {
     .notNull()
     .references(() => currencies.id, { onDelete: "restrict" }),
   date: integer("date", { mode: "timestamp" }).notNull().$defaultFn(() => sql`strftime('%s', 'now')`),
-  notes: text("notes"),
+  note: text("note"),
   category: text("category"),
   monthPeriodId: text("month_period_id")
     .notNull()
