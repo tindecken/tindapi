@@ -147,6 +147,7 @@ transfer.post('/transfer', tbValidator('json', schema), async (c) => {
 		const txId = ulid();
 		const transactionData: InsertTransaction = {
 			id: ulid(),
+			userId: user.id,
       transactionTypeId: transferTransactionType.id,
       walletId: fromWalletId,
       toWalletId: toWalletId,
