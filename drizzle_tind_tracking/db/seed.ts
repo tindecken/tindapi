@@ -142,8 +142,8 @@ async function seed() {
 	const currencyId1 = ulid();
 	const currencyId2 = ulid();
   const currencyRows = [
-    { id: currencyId1, code: "VND", name: "Vietnamese Đồng", isDefault: true },
-    { id: currencyId2, code: "USD", name: "US Dollar", isDefault: false },
+    { id: currencyId1, userId: user1ID, code: "VND", name: "Vietnamese Đồng", isDefault: true },
+    { id: currencyId2, userId: user1ID, code: "USD", name: "US Dollar", isDefault: false },
   ];
   await db.insert(currencies).values(currencyRows).run();
   console.log(`  ✓ Currencies: ${currencyRows.length}`);
@@ -247,6 +247,7 @@ async function seed() {
   const mustPayRows = [
     {
       id: ulid(),
+			userId: user1ID,
       monthPeriodId: periodId2,
       name: "Rent",
       targetAmount: 5_000_000,
@@ -256,6 +257,7 @@ async function seed() {
     },
     {
       id: ulid(),
+			userId: user1ID,
       monthPeriodId: periodId2,
       name: "Electricity",
       targetAmount: 500_000,
@@ -265,6 +267,7 @@ async function seed() {
     },
     {
       id: ulid(),
+			userId: user1ID,
       monthPeriodId: periodId2,
       name: "Water",
       targetAmount: 200_000,
@@ -274,6 +277,7 @@ async function seed() {
     },
     {
       id: ulid(),
+			userId: user1ID,
       monthPeriodId: periodId2,
       name: "Internet",
       targetAmount: 300_000,
@@ -283,6 +287,7 @@ async function seed() {
     },
     {
       id: ulid(),
+			userId: user1ID,
       monthPeriodId: periodId2,
       name: "Insurance",
       targetAmount: 1_000_000,
@@ -292,6 +297,7 @@ async function seed() {
     },
     {
       id: ulid(),
+			userId: user1ID,
       monthPeriodId: periodId2,
       name: "Haircut",
       targetAmount: 100_000,
@@ -302,6 +308,7 @@ async function seed() {
     // May period items
     {
       id: ulid(),
+			userId: user1ID,
       monthPeriodId: periodId1,
       name: "Rent",
       targetAmount: 5_000_000,
@@ -311,6 +318,7 @@ async function seed() {
     },
     {
       id: ulid(),
+			userId: user1ID,
       monthPeriodId: periodId1,
       name: "Haircut",
       targetAmount: 100_000,

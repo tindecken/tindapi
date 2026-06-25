@@ -21,7 +21,7 @@ const schema = Type.Object({
   fee: Type.Optional(Type.Number()),           // optional fee deducted from source
   currencyId: Type.Optional(Type.String()),     // defaults to active default currency
   monthPeriodId: Type.Optional(Type.String()),  // defaults to active month period
-  notes: Type.Optional(Type.String()),
+  note: Type.Optional(Type.String()),
 })
 
 transfer.post('/transfer', tbValidator('json', schema), async (c) => {
@@ -38,7 +38,7 @@ transfer.post('/transfer', tbValidator('json', schema), async (c) => {
       };
 			return c.json(response, 401);
 		}
-    const { fromWalletId, toWalletId, amount, fee, currencyId, monthPeriodId, notes } = c.req.valid('json');
+    const { fromWalletId, toWalletId, amount, fee, currencyId, monthPeriodId, note } = c.req.valid('json');
 
     // ----------------------------------------------------------------
     // Basic input validation
@@ -154,7 +154,7 @@ transfer.post('/transfer', tbValidator('json', schema), async (c) => {
       amount: amount,
       fee: fee ?? 0,
       currencyId: resolvedCurrencyId,
-      notes: notes ?? null,
+      note: note ?? null,
       category: null,
       monthPeriodId: resolvedMonthPeriodId,
       mustPayTransactionId: null,
