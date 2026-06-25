@@ -22,7 +22,7 @@ const schema = Type.Object({
 	amount: Type.Number(),
 	currencyId: Type.Optional(Type.String()),
 	date: Type.Optional(Type.Number()),
-	notes: Type.Optional(Type.String()),
+	note: Type.Optional(Type.String()),
 	categoryId: Type.Optional(Type.String()),
 	monthPeriodId: Type.Optional(Type.String()),
 })
@@ -34,7 +34,7 @@ createStandardTransaction.post('/', tbValidator('json', schema), async (c) => {
 			return c.json({ success: false, message: "Unauthorized", data: null } satisfies GenericResponseInterface, 401);
 		}
 
-		const { walletId, amount, currencyId, date, notes, categoryId, monthPeriodId } = c.req.valid('json');
+		const { walletId, amount, currencyId, date, note, categoryId, monthPeriodId } = c.req.valid('json');
 
 		const { db, client } = createDbClient(c.env);
 
@@ -126,7 +126,7 @@ createStandardTransaction.post('/', tbValidator('json', schema), async (c) => {
 			fee: 0,
 			currencyId: resolvedCurrencyId,
 			date: resolvedDate,
-			notes: notes ?? null,
+			note: note ?? null,
 			category: resolvedCategory,
 			monthPeriodId: resolvedMonthPeriodId,
 			mustPayTransactionId: null,
