@@ -2,7 +2,7 @@ import { Hono } from 'hono';
 import Type from 'typebox';
 import type { GenericResponseInterface } from '../../../models/GenericResponseInterface';
 import { tbValidator } from '@hono/typebox-validator';
-import { eq } from 'drizzle-orm';
+import { eq, desc } from 'drizzle-orm';
 import { ulid } from 'ulid';
 import {
 	mustPayTransactions,
@@ -19,7 +19,7 @@ export const create = new Hono<{ Bindings: Env }>();
 const schema = Type.Object({
 	name: Type.String(),
 	targetAmount: Type.Number(),
-	monthPeriodId: Type.String(),
+	monthPeriodId: Type.Optional(Type.String()),
 	currencyId: Type.Optional(Type.String()),
 	categoryId: Type.Optional(Type.String()),
 	walletId: Type.Optional(Type.String()),
@@ -40,18 +40,34 @@ create.post('/mustpay', tbValidator('json', schema), async (c) => {
 
 		const { db, client } = createDbClient(c.env);
 
-		const [monthPeriod] = await db
-			.select()
-			.from(monthPeriods)
-			.where(eq(monthPeriods.id, monthPeriodId))
-			.limit(1);
-		if (!monthPeriod) {
-			client.close();
-			return c.json({ success: false, message: "Month period not found", data: null } satisfies GenericResponseInterface, 404);
-		}
-		if (monthPeriod.userId !== user.id) {
-			client.close();
-			return c.json({ success: false, message: "Month period does not belong to you", data: null } satisfies GenericResponseInterface, 403);
+		let resolvedMonthPeriodId = monthPeriodId;
+		if (!resolvedMonthPeriodId) {
+			const [activePeriod] = await db
+				.select()
+				.from(monthPeriods)
+				.where(eq(monthPeriods.isActive, true))
+				.orderBy(desc(monthPeriods.createdAt))
+				.limit(1);
+			if (activePeriod) {
+				resolvedMonthPeriodId = activePeriod.id;
+			} else {
+				client.close();
+				return c.json({ success: false, message: "No active month period found", data: null } satisfies GenericResponseInterface, 400);
+			}
+		} else {
+			const [monthPeriod] = await db
+				.select()
+				.from(monthPeriods)
+				.where(eq(monthPeriods.id, resolvedMonthPeriodId))
+				.limit(1);
+			if (!monthPeriod) {
+				client.close();
+				return c.json({ success: false, message: "Month period not found", data: null } satisfies GenericResponseInterface, 404);
+			}
+			if (monthPeriod.userId !== user.id) {
+				client.close();
+				return c.json({ success: false, message: "Month period does not belong to you", data: null } satisfies GenericResponseInterface, 403);
+			}
 		}
 
 		let resolvedCurrencyId = currencyId;
@@ -119,7 +135,7 @@ create.post('/mustpay', tbValidator('json', schema), async (c) => {
 		const mustPayData: Omit<typeof mustPayTransactions.$inferInsert, "createdAt" | "updatedAt"> = {
 			id,
 			userId: user.id,
-			monthPeriodId,
+			monthPeriodId: resolvedMonthPeriodId,
 			name,
 			targetAmount,
 			remainingAmount: targetAmount,
