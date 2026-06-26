@@ -1,6 +1,7 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { swaggerUI } from '@hono/swagger-ui';
+import { openApiDoc } from './openapi';
 import { getAuth } from './auth/auth';
 import { getAllTransactions } from "./routes/spreadsheet/getAllTransactions";
 import { lastTransaction } from "./routes/spreadsheet/lastTransaction";
@@ -95,7 +96,7 @@ app.use("*", cors({
 
 app.use("*", async (c, next) => {
   const path = c.req.path;
-  if (path.startsWith("/tind_tracking/auth")) {
+  if (path.startsWith("/tind_tracking/auth") || path.startsWith("/doc") || path.startsWith("/ui")) {
     await next();
     return;
   }
@@ -108,23 +109,7 @@ app.use("*", async (c, next) => {
   await next();
 });
 // Swagger
-// A basic OpenAPI document
-const openApiDoc = {
-  openapi: '3.0.0', // This is the required version field
-  info: {
-    title: 'API Documentation',
-    version: '1.0.0',
-    description: 'API documentation for your service',
-  },
-  paths: {
-    // Add your API paths here
-    // Add more endpoints as needed
-  },
-}
-// Serve the OpenAPI document
 app.get('/doc', (c) => c.json(openApiDoc))
-
-// Use the middleware to serve Swagger UI at /ui
 app.get('/ui', swaggerUI({ url: '/doc' }))
 
 app.get("/tind_tracking/auth/sign-in/:provider", async (c) => {
