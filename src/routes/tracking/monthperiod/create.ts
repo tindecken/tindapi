@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import Type from 'typebox'
 import type { GenericResponseInterface } from '../../../models/GenericResponseInterface';
 import { tbValidator } from '@hono/typebox-validator'
-import { eq } from "drizzle-orm";
+import { eq, and, sql } from "drizzle-orm";
 import { ulid } from "ulid";
 import { monthPeriods } from "../../../../drizzle_tind_tracking/db/schema";
 import { createDbClient } from "../../../../drizzle_tind_tracking/db/dbClient";
@@ -28,12 +28,27 @@ create.post('/month-periods', tbValidator('json', schema), async (c) => {
 
     const { db, client } = createDbClient(c.env);
 
+    const trimmedName = name.trim();
+    const [existing] = await db
+      .select()
+      .from(monthPeriods)
+      .where(and(
+        sql`LOWER(${monthPeriods.name}) = LOWER(${trimmedName})`,
+        eq(monthPeriods.userId, user.id)
+      ))
+      .limit(1);
+
+    if (existing) {
+      client.close();
+      return c.json({ success: false, message: "Month period with this name already exists", data: null } satisfies GenericResponseInterface, 400);
+    }
+
     const now = Date.now();
     const id = ulid();
 		const monthPeriodData: Omit<typeof monthPeriods.$inferInsert, "createdAt" | "updatedAt"> = {
 			id,
 			userId: user.id,
-			name,
+			name: trimmedName,
 			startDate: new Date(startDate),
 			endDate: new Date(endDate),
 			isActive: isActive ?? false,

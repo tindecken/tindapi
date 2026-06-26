@@ -3,7 +3,7 @@ import Type from 'typebox'
 import type { GenericResponseInterface } from '../../../models/GenericResponseInterface';
 import { tbValidator } from '@hono/typebox-validator'
 import { eq, and, sql } from "drizzle-orm";
-import { monthPeriods } from "../../../../drizzle_tind_tracking/db/schema";
+import { categories } from "../../../../drizzle_tind_tracking/db/schema";
 import { createDbClient } from "../../../../drizzle_tind_tracking/db/dbClient";
 import { getAuthenticatedUserInfo } from "../../../auth/getAuthenticatedUser";
 
@@ -12,82 +12,81 @@ export const update = new Hono<{ Bindings: Env }>();
 const schema = Type.Object({
   id: Type.String(),
   name: Type.Optional(Type.String()),
-  startDate: Type.Optional(Type.Number()),
-  endDate: Type.Optional(Type.Number()),
-  isActive: Type.Optional(Type.Boolean()),
+  note: Type.Optional(Type.String()),
+  icon: Type.Optional(Type.String()),
+  color: Type.Optional(Type.String()),
 })
 
-update.put('/month-periods', tbValidator('json', schema), async (c) => {
+update.put('/categories', tbValidator('json', schema), async (c) => {
   try {
     const user = getAuthenticatedUserInfo(c);
     if (!user) {
       return c.json({ success: false, message: "Unauthorized", data: null } satisfies GenericResponseInterface, 401);
     }
 
-    const { id, name, startDate, endDate, isActive } = c.req.valid('json');
+    const { id, name, note, icon, color } = c.req.valid('json');
 
     const { db, client } = createDbClient(c.env);
 
     const [existing] = await db
       .select()
-      .from(monthPeriods)
-      .where(eq(monthPeriods.id, id))
+      .from(categories)
+      .where(eq(categories.id, id))
       .limit(1);
 
     if (!existing) {
       client.close();
-      return c.json({ success: false, message: "Month period not found", data: null } satisfies GenericResponseInterface, 404);
+      return c.json({ success: false, message: "Category not found", data: null } satisfies GenericResponseInterface, 404);
     }
-    if (existing.userId !== user.id) {
+    if (existing.userId && existing.userId !== user.id) {
       client.close();
-      return c.json({ success: false, message: "Month period does not belong to you", data: null } satisfies GenericResponseInterface, 403);
+      return c.json({ success: false, message: "Category does not belong to you", data: null } satisfies GenericResponseInterface, 403);
     }
 
-    const now = new Date();
-    const updateData: Record<string, any> = { updatedAt: now };
+    const updateData: Record<string, any> = { updatedAt: new Date() };
     if (name !== undefined) {
       const trimmed = name.trim();
       const [duplicate] = await db
         .select()
-        .from(monthPeriods)
+        .from(categories)
         .where(and(
-          sql`LOWER(${monthPeriods.name}) = LOWER(${trimmed})`,
-          eq(monthPeriods.userId, user.id)
+          sql`LOWER(${categories.name}) = LOWER(${trimmed})`,
+          eq(categories.userId, user.id)
         ))
         .limit(1);
       if (duplicate && duplicate.id !== id) {
         client.close();
-        return c.json({ success: false, message: "Month period with this name already exists", data: null } satisfies GenericResponseInterface, 400);
+        return c.json({ success: false, message: "Category with this name already exists", data: null } satisfies GenericResponseInterface, 400);
       }
       updateData.name = trimmed;
     }
-    if (startDate !== undefined) updateData.startDate = new Date(startDate);
-    if (endDate !== undefined) updateData.endDate = new Date(endDate);
-    if (isActive !== undefined) updateData.isActive = isActive;
+    if (note !== undefined) updateData.note = note.trim();
+    if (icon !== undefined) updateData.icon = icon.trim();
+    if (color !== undefined) updateData.color = color.trim();
 
-    await db.update(monthPeriods)
+    await db.update(categories)
       .set(updateData)
-      .where(eq(monthPeriods.id, id))
+      .where(eq(categories.id, id))
       .run();
 
     const [updated] = await db
       .select()
-      .from(monthPeriods)
-      .where(eq(monthPeriods.id, id))
+      .from(categories)
+      .where(eq(categories.id, id))
       .limit(1);
 
     client.close();
 
     const res: GenericResponseInterface = {
       success: true,
-      message: "Month period updated successfully",
+      message: `Category "${updated.name}" updated successfully`,
       data: updated,
     };
     return c.json(res, 200);
   } catch (error: any) {
     return c.json({
       success: false,
-      message: `Error updating month period: ${error}${error.code ? ` - ${error.code}` : ""}`,
+      message: `Error updating category: ${error}${error.code ? ` - ${error.code}` : ""}`,
       data: null,
     } satisfies GenericResponseInterface, 500);
   }
