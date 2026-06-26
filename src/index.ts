@@ -21,7 +21,7 @@ import { getPostsBySecretName } from "./routes/supabase/getPostsBySecretName";
 import { createPost } from "./routes/supabase/createPost";
 import { testSupabase } from './routes/supabase/testSupabase';
 import { transfer } from './routes/tracking/transaction/transfer';
-import { createTransaction } from './routes/tracking/transaction/createStandard';
+import { createStandardTransaction } from './routes/tracking/transaction/createStandard';
 import { create as createMonthPeriod } from './routes/tracking/monthperiod/create';
 import { get as getMonthPeriod } from './routes/tracking/monthperiod/get';
 import { update as updateMonthPeriod } from './routes/tracking/monthperiod/update';
@@ -32,6 +32,7 @@ import { get as getRates } from './routes/tracking/rate/get';
 import { update as updateRate } from './routes/tracking/rate/update';
 import { del as deleteRate } from './routes/tracking/rate/delete';
 import { get as getLatestRate } from './routes/tracking/rate/getLatestRateOfCurrencyPair';
+import { create as createMustPayTransaction } from './routes/tracking/mustpaytransaction/create';
 
 type Variables = {
   user: {
@@ -154,7 +155,7 @@ app.route("/supabase", getPostsBySecretName);
 app.route("/supabase", createPost);
 app.route("/supabase", testSupabase);
 app.route("/tind_tracking", transfer);
-app.route("/tind_tracking", createTransaction);
+app.route("/tind_tracking", createStandardTransaction);
 app.route("/tind_tracking", createMonthPeriod);
 app.route("/tind_tracking", getMonthPeriod);
 app.route("/tind_tracking", updateMonthPeriod);
@@ -165,5 +166,6 @@ app.route("/tind_tracking", getRates);
 app.route("/tind_tracking", updateRate);
 app.route("/tind_tracking", deleteRate);
 app.route("/tind_tracking", getLatestRate);
+app.route("/tind_tracking", createMustPayTransaction);
 
 export default app;

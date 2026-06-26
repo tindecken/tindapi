@@ -167,16 +167,8 @@ async function seed() {
     { id: categoryId5, name: "Entertainment", icon: "🎬", color: "#8b5cf6", userId: user1ID },
     { id: categoryId6, name: "Health", icon: "🏥", color: "#ec4899", userId: user1ID },
     { id: categoryId7, name: "Shopping", icon: "🛍️", color: "#f97316", userId: user1ID },
-    { id: categoryId8, name: "Other", icon: "📌", color: "#a1a1aa", userId: user1ID },
-    {
-      id: categoryId9,
-      name: "Side Hustle",
-      icon: "💼",
-      color: "#14b8a6",
-      userId: user1ID,
-    },
-		{
-      id: categoryId10,
+    { id: categoryId9, name: "Unexpected", icon: "💼", color: "#14b8a6", userId: user1ID},
+		{ id: categoryId10,
       name: "Uncategorized",
       icon: "❓",
       color: "#9ca3af",

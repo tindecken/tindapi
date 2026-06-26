@@ -29,6 +29,13 @@
       "when": 1782183408453,
       "tag": "0003_unusual_vapor",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1782440035638,
+      "tag": "0004_stiff_annihilus",
+      "breakpoints": true
     }
   ]
 }

@@ -177,6 +177,7 @@ export const mustPayTransactions = sqliteTable("must_pay_transaction", {
     .notNull()
     .references(() => currencies.id, { onDelete: "restrict" }),
   categoryId: text("category_id").references(() => categories.id, { onDelete: "set null" }),
+  walletId: text("wallet_id").references(() => wallets.id, { onDelete: "set null" }),
   createdAt: integer("created_at", { mode: "timestamp" }).notNull().$defaultFn(() => sql`strftime('%s', 'now')`),
   updatedAt: integer("updated_at", { mode: "timestamp" })
     .notNull()
@@ -303,6 +304,7 @@ export const verificationRelations = relations(verification, () => ({}));
 // wallet (many) -> user (1)
 // wallet (1) -> transaction (many), via walletId
 // wallet (1) -> transaction (many), via toWalletId (incoming transfers)
+// wallet (1) -> must_pay_transaction (many)
 export const walletRelations = relations(wallets, ({ one, many }) => ({
   user: one(user, {
     fields: [wallets.userId],
@@ -310,6 +312,7 @@ export const walletRelations = relations(wallets, ({ one, many }) => ({
   }),
   transactions: many(transactions, { relationName: "walletTransactions" }),
   incomingTransactions: many(transactions, { relationName: "toWalletTransactions" }),
+  mustPayTransactions: many(mustPayTransactions),
 }));
 
 // currency (many) -> user (1)
@@ -415,6 +418,7 @@ export const transactionRelations = relations(transactions, ({ one, many }) => (
 // must_pay_transaction (many) -> month_period (1)
 // must_pay_transaction (many) -> currency (1)
 // must_pay_transaction (many) -> category (1)
+// must_pay_transaction (many) -> wallet (1)
 // must_pay_transaction (1) -> transaction (many)
 export const mustPayTransactionRelations = relations(mustPayTransactions, ({ one, many }) => ({
   user: one(user, {
@@ -432,6 +436,10 @@ export const mustPayTransactionRelations = relations(mustPayTransactions, ({ one
   category: one(categories, {
     fields: [mustPayTransactions.categoryId],
     references: [categories.id],
+  }),
+  wallet: one(wallets, {
+    fields: [mustPayTransactions.walletId],
+    references: [wallets.id],
   }),
   transactions: many(transactions),
 }));

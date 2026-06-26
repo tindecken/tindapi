@@ -1,0 +1,1 @@
+ALTER TABLE `must_pay_transaction` ADD `wallet_id` text REFERENCES wallet(id);
