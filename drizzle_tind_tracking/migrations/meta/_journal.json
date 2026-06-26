@@ -36,6 +36,13 @@
       "when": 1782440035638,
       "tag": "0004_stiff_annihilus",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1782484052119,
+      "tag": "0005_skinny_rawhide_kid",
+      "breakpoints": true
     }
   ]
 }

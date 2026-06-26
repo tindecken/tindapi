@@ -151,57 +151,36 @@ async function seed() {
   // ── 4. Categories ────────────────────────────────────
 	const categoryId1 = ulid();
 	const categoryId2 = ulid();
-	const categoryId3 = ulid();
-	const categoryId4 = ulid();
-	const categoryId5 = ulid();
-	const categoryId6 = ulid();
-	const categoryId7 = ulid();
-	const categoryId8 = ulid();
-	const categoryId9 = ulid();
-	const categoryId10 = ulid();
   const categoryRows = [
-    { id: categoryId1, name: "Salary", icon: "💰", color: "#22c55e", userId: user1ID },
-    { id: categoryId2, name: "Food & Dining", icon: "🍕", color: "#ef4444", userId: user1ID },
-    { id: categoryId3, name: "Transport", icon: "🚗", color: "#3b82f6", userId: user1ID },
-    { id: categoryId4, name: "Utilities", icon: "⚡", color: "#f59e0b", userId: user1ID },
-    { id: categoryId5, name: "Entertainment", icon: "🎬", color: "#8b5cf6", userId: user1ID },
-    { id: categoryId6, name: "Health", icon: "🏥", color: "#ec4899", userId: user1ID },
-    { id: categoryId7, name: "Shopping", icon: "🛍️", color: "#f97316", userId: user1ID },
-    { id: categoryId9, name: "Unexpected", icon: "💼", color: "#14b8a6", userId: user1ID},
-		{ id: categoryId10,
-      name: "Uncategorized",
-      icon: "❓",
-      color: "#9ca3af",
-			isDefault: true,
-      userId: user1ID,
-    },
+    { id: categoryId1, name: "Unexpected", icon: "💼", color: "#14b8a6", userId: user1ID},
+		{ id: categoryId2, name: "Uncategorized", icon: "❓", color: "#9ca3af", isDefault: true, userId: user1ID},
   ];
   await db.insert(categories).values(categoryRows).run();
   console.log(`  ✓ Categories: ${categoryRows.length}`);
 
   // ── 5. Wallets ───────────────────────────────────────
-	const walletId1 = ulid();
-	const walletId2 = ulid();
-	const walletId3 = ulid();
-	const walletId4 = ulid();
-	const walletId5 = ulid();
-	const walletId6 = ulid();
+	const walletId1 = "01KW262KJM42W9QB14BS56RE1Z";
+	const walletId2 = "01KW262KJMYPRD3PGNX8XJP37T";
+	const walletId3 = "01KW262KJM1KA1Q73J2R8F0JER";
+	const walletId4 = "01KW262KJMJSFP6ZFJSGA988AE";
+	const walletId5 = "01KW262KJMQTZP3ND6Q04SPAMW";
+	const walletId6 = "01KW262KJMJPCJBGBD5RGAC4KT";
   const walletRows = [
-    { id: walletId1, userId: user1ID, name: "ATM", isDefault: true, isDelegated: false, balance: 0 },
-    { id: walletId2, userId: user1ID, name: "Cash", isDefault: false, isDelegated: false, balance: 0 },
+    { id: walletId1, userId: user1ID, name: "ATM", isDefault: true, isDelegated: false, balance: 72794 },
+    { id: walletId2, userId: user1ID, name: "Cash", isDefault: false, isDelegated: false, balance: 734 },
     { id: walletId3, userId: user1ID, name: "HSBC", isDefault: false, isDelegated: false, balance: 0 },
     { id: walletId4, userId: user1ID, name: "Momo", isDefault: false, isDelegated: false, balance: 0 },
-    { id: walletId5, userId: user1ID, name: "Nhi", isDefault: false, isDelegated: true, balance: 0 },
-    { id: walletId6, userId: user2ID, name: "Jane's ATM", isDefault: true, isDelegated: false, balance: 0 },
+		{ id: walletId5, userId: user1ID, name: "Saving (Momo)", isDefault: false, isDelegated: false, isSaving: true, balance: 14500 },
+    { id: walletId6, userId: user1ID, name: "Nhi", isDefault: false, isDelegated: true, balance: 0 },
   ];
   await db.insert(wallets).values(walletRows).run();
   console.log(`  ✓ Wallets: ${walletRows.length}`);
 
 	// ── 6. Transaction Types ───────────────────────────────
-	const transactionTypeId1 = ulid();
-	const transactionTypeId2 = ulid();
-	const transactionTypeId3 = ulid();
-	const transactionTypeId4 = ulid();
+	const transactionTypeId1 = "01KW262KPAVN9XE0FYRGN2AVY5";
+	const transactionTypeId2 = "01KW262KPAVE7254NCJ5CY81JJ";
+	const transactionTypeId3 = "01KW262KPAE8DDNDVJ3PY8WDFK";
+	const transactionTypeId4 = "01KW262KPABEX9F8RGV2B4WA7Q";
 	const transactionTypeRows = [
 		{ id: transactionTypeId1, name: "standard", userId: user1ID, isDefault: true },
 		{ id: transactionTypeId2, name: "reconciliation", userId: user1ID },
@@ -212,109 +191,169 @@ async function seed() {
 	console.log(`  ✓ Transaction Types: ${transactionTypeRows.length}`);
 
   // ── 7. MonthPeriods ──────────────────────────────────
-	const periodId1 = ulid();
-	const periodId2 = ulid();
+	const monthperiodId1 = "01KW25ST96QDX6W4SNZCCHQG7A";
   const periodRows = [
     {
-      id: periodId1,
+      id: monthperiodId1,
 			userId: user1ID,
-      name: "May 2026",
-      startDate: sql`strftime('%s', '2026-05-23')`,
-      endDate: sql`strftime('%s', '2026-06-22')`,
-      isActive: false,
-    },
-    {
-      id: periodId2,
-			userId: user1ID,
-      name: "June 2026",
-      startDate: sql`strftime('%s', '2026-06-23')`,
-      endDate: sql`strftime('%s', '2026-07-22')`,
+      name: "July 2026",
+      startDate: sql`strftime('%s', '2026-06-26')`,
+      endDate: sql`strftime('%s', '2026-07-26')`,
       isActive: true,
-    },
+    }
   ];
   await db.insert(monthPeriods).values(periodRows).run();
   console.log(`  ✓ MonthPeriods: ${periodRows.length}`);
 
   // ── 7. MustPayTransactions ───────────────────────────
+	const mustPayTransactionId1 = "01KW26CWDYD3DS84R5MXJ452G4";
+const mustPayTransactionId2 = "01KW26CWDZJFPGPZJYH8C8WBV3";
+const mustPayTransactionId3 = "01KW26CWDZK4YACNRHMBJWR48G";
+const mustPayTransactionId4 = "01KW26CWDZMD5Q4BPWYZTYVXE9";
+const mustPayTransactionId5 = "01KW26CWDZHHY42NKR9JQN3YW9";
+const mustPayTransactionId6 = "01KW26CWDZE2WAFVY2S9AEA1M4";
+const mustPayTransactionId7 = "01KW26CWDZ7FG6CY5B67K1Q6TX";
+const mustPayTransactionId8 = "01KW26CWDZEVAW86QXAGQR5251";
+const mustPayTransactionId9 = "01KW26CWDZ1J33ACCAA0VD17YM";
+const mustPayTransactionId10 = "01KW26CWDZXP62253532SJSC0J";
+const mustPayTransactionId11 = "01KW26CWDZZSFY8B19Z63AGRR3";
+const mustPayTransactionId12 = "01KW26CWDZAGRXFRNC0PAFZRDM";
+const mustPayTransactionId13 = "01KW26CWDZTHAX9C6W1TE7TDXS";
+
+
   const mustPayRows = [
     {
-      id: ulid(),
+      id: mustPayTransactionId1,
 			userId: user1ID,
-      monthPeriodId: periodId2,
-      name: "Rent",
-      targetAmount: 5_000_000,
-      remainingAmount: 3_000_000,
+      monthPeriodId: monthperiodId1,
+      name: "Nhi 1",
+      targetAmount: 54000,
+      remainingAmount: 54000,
+      currencyId: currencyId1,
+      categoryId: categoryId1,
+			walletId: walletId5,
+    },
+    {
+      id: mustPayTransactionId2,
+			userId: user1ID,
+      monthPeriodId: monthperiodId1,
+      name: "Nhi tháng 5",
+      targetAmount: 2692,
+      remainingAmount: 2692,
+      currencyId: currencyId1,
+      categoryId: categoryId1,
+			walletId: walletId5,
+    },
+    {
+      id: mustPayTransactionId3,
+			userId: user1ID,
+      monthPeriodId: monthperiodId1,
+      name: "Nhi (cho)",
+      targetAmount: 26000,
+      remainingAmount: 26000,
+      currencyId: currencyId1,
+      categoryId: categoryId1,
+			walletId: walletId5,
+    },
+    {
+      id: mustPayTransactionId4,
+			userId: user1ID,
+      monthPeriodId: monthperiodId1,
+      name: "xăng 2",
+      targetAmount: 800,
+      remainingAmount: 800,
       currencyId: currencyId1,
       categoryId: categoryId1,
     },
     {
-      id: ulid(),
+      id: mustPayTransactionId5,
 			userId: user1ID,
-      monthPeriodId: periodId2,
-      name: "Electricity",
-      targetAmount: 500_000,
-      remainingAmount: 500_000,
+      monthPeriodId: monthperiodId1,
+      name: "Nhớt xe",
+      targetAmount: 150,
+      remainingAmount: 150,
       currencyId: currencyId1,
       categoryId: categoryId1,
     },
     {
-      id: ulid(),
+      id: mustPayTransactionId6,
 			userId: user1ID,
-      monthPeriodId: periodId2,
-      name: "Water",
-      targetAmount: 200_000,
-      remainingAmount: 200_000,
-      currencyId: currencyId1,
-      categoryId: categoryId1,
-    },
-    {
-      id: ulid(),
-			userId: user1ID,
-      monthPeriodId: periodId2,
-      name: "Internet",
-      targetAmount: 300_000,
-      remainingAmount: 300_000,
-      currencyId: currencyId1,
-      categoryId: categoryId1,
-    },
-    {
-      id: ulid(),
-			userId: user1ID,
-      monthPeriodId: periodId2,
-      name: "Insurance",
-      targetAmount: 1_000_000,
-      remainingAmount: 1_000_000,
-      currencyId: currencyId1,
-      categoryId: categoryId1,
-    },
-    {
-      id: ulid(),
-			userId: user1ID,
-      monthPeriodId: periodId2,
-      name: "Haircut",
-      targetAmount: 100_000,
-      remainingAmount: 0,
+      monthPeriodId: monthperiodId1,
+      name: "Gửi xe",
+      targetAmount: 50,
+      remainingAmount: 50,
       currencyId: currencyId1,
       categoryId: null,
     },
-    // May period items
     {
-      id: ulid(),
+      id: mustPayTransactionId7,
 			userId: user1ID,
-      monthPeriodId: periodId1,
-      name: "Rent",
-      targetAmount: 5_000_000,
-      remainingAmount: 0,
+      monthPeriodId: monthperiodId1,
+      name: "đt + 4g",
+      targetAmount: 100,
+      remainingAmount: 100,
       currencyId: currencyId1,
       categoryId: categoryId1,
     },
     {
-      id: ulid(),
+      id: mustPayTransactionId8,
 			userId: user1ID,
-      monthPeriodId: periodId1,
+      monthPeriodId: monthperiodId1,
       name: "Haircut",
-      targetAmount: 100_000,
-      remainingAmount: 0,
+      targetAmount: 150,
+      remainingAmount: 150,
+      currencyId: currencyId1,
+      categoryId: null,
+    },
+		{
+      id: mustPayTransactionId9,
+			userId: user1ID,
+      monthPeriodId: monthperiodId1,
+      name: "xăng 1",
+      targetAmount: 680,
+      remainingAmount: 680,
+      currencyId: currencyId1,
+      categoryId: null,
+    },
+		{
+      id: mustPayTransactionId10,
+			userId: user1ID,
+      monthPeriodId: monthperiodId1,
+      name: "rửa xe",
+      targetAmount: 70,
+      remainingAmount: 70,
+      currencyId: currencyId1,
+      categoryId: null,
+    },
+		{
+      id: mustPayTransactionId11,
+			userId: user1ID,
+      monthPeriodId: monthperiodId1,
+      name: "Quỹ",
+      targetAmount: 5500,
+      remainingAmount: 5500,
+      currencyId: currencyId1,
+      categoryId: null,
+			walletId: walletId4,
+    },
+		{
+      id: mustPayTransactionId12,
+			userId: user1ID,
+      monthPeriodId: monthperiodId1,
+      name: "Momo",
+      targetAmount: -26000,
+      remainingAmount: -26000,
+      currencyId: currencyId1,
+      categoryId: null,
+			walletId: walletId4,
+    },
+		{
+      id: mustPayTransactionId13,
+			userId: user1ID,
+      monthPeriodId: monthperiodId1,
+      name: "Y",
+      targetAmount: 1000,
+      remainingAmount: 1000,
       currencyId: currencyId1,
       categoryId: null,
     },
@@ -323,9 +362,11 @@ async function seed() {
   console.log(`  ✓ MustPayTransactions: ${mustPayRows.length}`);
 
   // ── 8. WithdrawFees ──────────────────────────────────
+	const feeId1 = "01KW26F4B54W8ZJ0RJN810A4PF";
+	const feeId2 = "01KW26F4B57K4YFFF0E3R67Y010";
   const feeRows = [
-    { id: ulid(), feeAmount: 22_000, name: "ATM Withdrawal", isDefault: true, createdAt: now },
-    { id: ulid(), feeAmount: 11_000, name: "Bank Transfer", isDefault: false, createdAt: now },
+    { id: ulid(), feeAmount: 1, name: "ATM Withdrawal", isDefault: true, createdAt: now },
+    { id: ulid(), feeAmount: 3, name: "ATM Withdrawal`", isDefault: false, createdAt: now },
   ];
   await db.insert(withdrawFees).values(feeRows).run();
   console.log(`  ✓ WithdrawFees: ${feeRows.length}`);

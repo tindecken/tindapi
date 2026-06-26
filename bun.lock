@@ -6,6 +6,7 @@
       "name": "tindtracking",
       "dependencies": {
         "@better-auth/expo": "^1.6.20",
+        "@hono/swagger-ui": "^0.6.1",
         "@hono/typebox-validator": "^1.1.0",
         "@libsql/client": "^0.17.3",
         "@supabase/supabase-js": "^2.106.1",
@@ -125,6 +126,8 @@
     "@esbuild/win32-ia32": ["@esbuild/win32-ia32@0.27.3", "", { "os": "win32", "cpu": "ia32" }, "sha512-QLKSFeXNS8+tHW7tZpMtjlNb7HKau0QDpwm49u0vUp9y1WOF+PEzkU84y9GqYaAVW8aH8f3GcBck26jh54cX4Q=="],
 
     "@esbuild/win32-x64": ["@esbuild/win32-x64@0.27.3", "", { "os": "win32", "cpu": "x64" }, "sha512-4uJGhsxuptu3OcpVAzli+/gWusVGwZZHTlS63hh++ehExkVT8SgiEf7/uC/PclrPPkLhZqGgCTjd0VWLo6xMqA=="],
+
+    "@hono/swagger-ui": ["@hono/swagger-ui@0.6.1", "", { "peerDependencies": { "hono": ">=4.0.0" } }, "sha512-sJTvldu1GPeEPfyeLG7gRj+W4vEuD+JDi+JjJ3TJs/DvMUtBLs0KJO5yokGegWWdy5qrbdnQGekbhgNRmPmYKQ=="],
 
     "@hono/typebox-validator": ["@hono/typebox-validator@1.1.0", "", { "peerDependencies": { "hono": ">=3.9.0", "typebox": "^1.0.30" } }, "sha512-pmrNFo0yrNhsX24vyakyoW7SfEWKjHA0SH1y6UYPYjGXRZe0zSP3ipOiJVcWGD+US+ZA9m9+D4Z6GtW9Ev9cPA=="],
 

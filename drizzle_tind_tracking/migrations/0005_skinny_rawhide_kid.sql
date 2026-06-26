@@ -1,0 +1,1 @@
+ALTER TABLE `wallet` ADD `is_saving` integer DEFAULT false NOT NULL;

@@ -1,0 +1,39 @@
+import { Hono } from "hono";
+import type { GenericResponseInterface } from '../../../models/GenericResponseInterface';
+import { eq, and } from "drizzle-orm";
+import { wallets } from "../../../../drizzle_tind_tracking/db/schema";
+import { createDbClient } from "../../../../drizzle_tind_tracking/db/dbClient";
+import { getAuthenticatedUserInfo } from "../../../auth/getAuthenticatedUser";
+
+export const getBalances = new Hono<{ Bindings: Env }>();
+
+getBalances.get('/wallets/balances', async (c) => {
+  try {
+    const user = getAuthenticatedUserInfo(c);
+    if (!user) {
+      return c.json({ success: false, message: "Unauthorized", data: null } satisfies GenericResponseInterface, 401);
+    }
+
+    const { db, client } = createDbClient(c.env);
+
+    const rows = await db
+      .select()
+      .from(wallets)
+      .where(and(eq(wallets.userId, user.id), eq(wallets.isDelegated, false)));
+
+    client.close();
+
+    const res: GenericResponseInterface = {
+      success: true,
+      message: "Wallet balances retrieved successfully",
+      data: rows,
+    };
+    return c.json(res, 200);
+  } catch (error: any) {
+    return c.json({
+      success: false,
+      message: `Error reading wallet balances: ${error}${error.code ? ` - ${error.code}` : ""}`,
+      data: null,
+    } satisfies GenericResponseInterface, 500);
+  }
+})

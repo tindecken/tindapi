@@ -1,5 +1,6 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
+import { swaggerUI } from '@hono/swagger-ui';
 import { getAuth } from './auth/auth';
 import { getAllTransactions } from "./routes/spreadsheet/getAllTransactions";
 import { lastTransaction } from "./routes/spreadsheet/lastTransaction";
@@ -31,6 +32,7 @@ import { create as createCategory } from './routes/tracking/category/create';
 import { get as getCategories } from './routes/tracking/category/get';
 import { update as updateCategory } from './routes/tracking/category/update';
 import { del as deleteCategory } from './routes/tracking/category/delete';
+import { getBalances } from './routes/tracking/wallet/getBalances';
 import { createMustpayTransaction } from './routes/tracking/transaction/createMustpayTransaction';
 import { create as createMustpay } from './routes/tracking/mustpaytransaction/create';
 import { get as getMustpay } from './routes/tracking/mustpaytransaction/get';
@@ -105,6 +107,25 @@ app.use("*", async (c, next) => {
   c.set("session", (session?.session ?? null) as any);
   await next();
 });
+// Swagger
+// A basic OpenAPI document
+const openApiDoc = {
+  openapi: '3.0.0', // This is the required version field
+  info: {
+    title: 'API Documentation',
+    version: '1.0.0',
+    description: 'API documentation for your service',
+  },
+  paths: {
+    // Add your API paths here
+    // Add more endpoints as needed
+  },
+}
+// Serve the OpenAPI document
+app.get('/doc', (c) => c.json(openApiDoc))
+
+// Use the middleware to serve Swagger UI at /ui
+app.get('/ui', swaggerUI({ url: '/doc' }))
 
 app.get("/tind_tracking/auth/sign-in/:provider", async (c) => {
   const provider = c.req.param("provider");
@@ -170,6 +191,7 @@ app.route("/tind_tracking", getMonthPeriod);
 app.route("/tind_tracking", updateMonthPeriod);
 app.route("/tind_tracking", deleteMonthPeriod);
 app.route("/tind_tracking", getCurrentMonthPeriod);
+app.route("/tind_tracking", getBalances);
 app.route("/tind_tracking", createMustpayTransaction);
 app.route("/tind_tracking", createMustpay);
 app.route("/tind_tracking", getMustpay);
