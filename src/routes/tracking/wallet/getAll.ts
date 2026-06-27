@@ -5,9 +5,9 @@ import { wallets } from "../../../../drizzle_tind_tracking/db/schema";
 import { createDbClient } from "../../../../drizzle_tind_tracking/db/dbClient";
 import { getAuthenticatedUserInfo } from "../../../auth/getAuthenticatedUser";
 
-export const getBalances = new Hono<{ Bindings: Env }>();
+export const getAllWallets = new Hono<{ Bindings: Env }>();
 
-getBalances.get('/wallets/balances', async (c) => {
+getAllWallets.get('/wallets', async (c) => {
   try {
     const user = getAuthenticatedUserInfo(c);
     if (!user) {
@@ -19,13 +19,13 @@ getBalances.get('/wallets/balances', async (c) => {
     const rows = await db
       .select()
       .from(wallets)
-      .where(and(eq(wallets.userId, user.id), eq(wallets.isDelegated, false)));
+      .where(eq(wallets.userId, user.id));
 
     client.close();
 
     const res: GenericResponseInterface = {
       success: true,
-      message: "Wallet balances retrieved successfully",
+      message: "Wallets retrieved successfully",
       data: rows,
     };
     return c.json(res, 200);

@@ -61,11 +61,6 @@ createMustpayTransaction.post('/mustpay-transactions/pay', tbValidator('json', s
 		}
 
 		// ── Validate pay wallet ──
-		if (mustpayTx.walletId && mustpayTx.walletId !== payWalletId) {
-			client.close();
-			return c.json({ success: false, message: "This must-pay transaction is linked to a different wallet", data: null } satisfies GenericResponseInterface, 400);
-		}
-
 		const [wallet] = await db
 			.select()
 			.from(wallets)
@@ -115,7 +110,7 @@ createMustpayTransaction.post('/mustpay-transactions/pay', tbValidator('json', s
 			fee: 0,
 			currencyId: mustpayTx.currencyId,
 			date: now,
-			note: `Payment for ${mustpayTx.name}`,
+			note: `${mustpayTx.name}`,
 			category: null,
 			monthPeriodId: mustpayTx.monthPeriodId,
 			mustPayTransactionId: mustpayTransactionId,

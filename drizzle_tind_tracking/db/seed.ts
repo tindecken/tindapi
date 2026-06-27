@@ -20,6 +20,7 @@ import {
   withdrawFees,
   logs,
 	transactionTypes,
+	settings,
 	InsertMustPayTransaction,
 } from "./schema";
 
@@ -60,6 +61,7 @@ async function seed() {
   // ── Clear existing data (reverse FK order) ─────────
   console.log("  Clearing existing data...");
   await db.delete(logs).run();
+  await db.delete(settings).run();
   await db.delete(transactions).run();
   await db.delete(mustPayTransactions).run();
   await db.delete(withdrawFees).run();
@@ -166,10 +168,10 @@ async function seed() {
 	const walletId5 = "01KW262KJMQTZP3ND6Q04SPAMW";
 	const walletId6 = "01KW262KJMJPCJBGBD5RGAC4KT";
   const walletRows = [
-    { id: walletId1, userId: user1ID, name: "ATM", isDefault: true, isDelegated: false, balance: 72794 },
+    { id: walletId1, userId: user1ID, name: "ATM", isDefault: true, isDelegated: false, balance: 72750 },
     { id: walletId2, userId: user1ID, name: "Cash", isDefault: false, isDelegated: false, balance: 734 },
     { id: walletId3, userId: user1ID, name: "HSBC", isDefault: false, isDelegated: false, balance: 0 },
-    { id: walletId4, userId: user1ID, name: "Momo", isDefault: false, isDelegated: false, balance: 0 },
+    { id: walletId4, userId: user1ID, name: "Momo", isDefault: false, isDelegated: false, balance: 26044 },
 		{ id: walletId5, userId: user1ID, name: "Saving (Momo)", isDefault: false, isDelegated: false, isSaving: true, balance: 14500 },
     { id: walletId6, userId: user1ID, name: "Nhi", isDefault: false, isDelegated: true, balance: 0 },
   ];
@@ -206,7 +208,7 @@ async function seed() {
   console.log(`  ✓ MonthPeriods: ${periodRows.length}`);
 
   // ── 7. MustPayTransactions ───────────────────────────
-	const mustPayTransactionId1 = "01KW26CWDYD3DS84R5MXJ452G4";
+const mustPayTransactionId1 = "01KW26CWDYD3DS84R5MXJ452G4";
 const mustPayTransactionId2 = "01KW26CWDZJFPGPZJYH8C8WBV3";
 const mustPayTransactionId3 = "01KW26CWDZK4YACNRHMBJWR48G";
 const mustPayTransactionId4 = "01KW26CWDZMD5Q4BPWYZTYVXE9";
@@ -218,43 +220,8 @@ const mustPayTransactionId9 = "01KW26CWDZ1J33ACCAA0VD17YM";
 const mustPayTransactionId10 = "01KW26CWDZXP62253532SJSC0J";
 const mustPayTransactionId11 = "01KW26CWDZZSFY8B19Z63AGRR3";
 const mustPayTransactionId12 = "01KW26CWDZAGRXFRNC0PAFZRDM";
-const mustPayTransactionId13 = "01KW26CWDZTHAX9C6W1TE7TDXS";
-
 
   const mustPayRows = [
-    {
-      id: mustPayTransactionId1,
-			userId: user1ID,
-      monthPeriodId: monthperiodId1,
-      name: "Nhi 1",
-      targetAmount: 54000,
-      remainingAmount: 54000,
-      currencyId: currencyId1,
-      categoryId: categoryId1,
-			walletId: walletId5,
-    },
-    {
-      id: mustPayTransactionId2,
-			userId: user1ID,
-      monthPeriodId: monthperiodId1,
-      name: "Nhi tháng 5",
-      targetAmount: 2692,
-      remainingAmount: 2692,
-      currencyId: currencyId1,
-      categoryId: categoryId1,
-			walletId: walletId5,
-    },
-    {
-      id: mustPayTransactionId3,
-			userId: user1ID,
-      monthPeriodId: monthperiodId1,
-      name: "Nhi (cho)",
-      targetAmount: 26000,
-      remainingAmount: 26000,
-      currencyId: currencyId1,
-      categoryId: categoryId1,
-			walletId: walletId5,
-    },
     {
       id: mustPayTransactionId4,
 			userId: user1ID,
@@ -334,21 +301,9 @@ const mustPayTransactionId13 = "01KW26CWDZTHAX9C6W1TE7TDXS";
       remainingAmount: 5500,
       currencyId: currencyId1,
       categoryId: null,
-			walletId: walletId4,
     },
 		{
       id: mustPayTransactionId12,
-			userId: user1ID,
-      monthPeriodId: monthperiodId1,
-      name: "Momo",
-      targetAmount: -26000,
-      remainingAmount: -26000,
-      currencyId: currencyId1,
-      categoryId: null,
-			walletId: walletId4,
-    },
-		{
-      id: mustPayTransactionId13,
 			userId: user1ID,
       monthPeriodId: monthperiodId1,
       name: "Y",
@@ -371,6 +326,14 @@ const mustPayTransactionId13 = "01KW26CWDZTHAX9C6W1TE7TDXS";
   await db.insert(withdrawFees).values(feeRows).run();
   console.log(`  ✓ WithdrawFees: ${feeRows.length}`);
 
+  // ── 9. Settings ──────────────────────────────────────
+  const settingsRows = [
+    { id: ulid(), userId: user1ID, name: "PerDayAmount", value: "200", note: "The daily spend amount" },
+    { id: ulid(), userId: user1ID, name: "EndOfPeriodDate", value: "6", note: "The last date to calculate perDay" },
+  ];
+  await db.insert(settings).values(settingsRows).run();
+  console.log(`  ✓ Settings: ${settingsRows.length}`);
+
   // ── Summary ──────────────────────────────────────────
   console.log("\n──────────────────────────────────────");
   console.log("  ✅ Seed complete!");
@@ -382,6 +345,7 @@ const mustPayTransactionId13 = "01KW26CWDZTHAX9C6W1TE7TDXS";
   console.log(`  Month Periods:      ${periodRows.length}`);
   console.log(`  Must-Pay Items:     ${mustPayRows.length}`);
   console.log(`  Withdraw Fee Rules: ${feeRows.length}`);
+  console.log(`  Settings:           ${settingsRows.length}`);
   console.log("──────────────────────────────────────\n");
 }
 

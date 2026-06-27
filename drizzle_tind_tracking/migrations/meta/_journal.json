@@ -43,6 +43,20 @@
       "when": 1782484052119,
       "tag": "0005_skinny_rawhide_kid",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1782521444119,
+      "tag": "0006_nice_radioactive_man",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1782529531074,
+      "tag": "0007_useful_ravenous",
+      "breakpoints": true
     }
   ]
 }

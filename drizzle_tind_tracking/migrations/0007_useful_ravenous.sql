@@ -1,0 +1,2 @@
+ALTER TABLE `must_pay_transaction` RENAME COLUMN "wallet_id" TO "receive_wallet_id";--> statement-breakpoint
+ALTER TABLE `must_pay_transaction` ALTER COLUMN "receive_wallet_id" TO "receive_wallet_id" text REFERENCES wallet(id) ON DELETE set null ON UPDATE no action;
