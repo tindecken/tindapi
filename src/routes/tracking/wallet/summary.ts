@@ -113,9 +113,9 @@ getWalletSummary.get('/wallets/summary', async (c) => {
     const endMonth = endDate.getMonth();
     const nextMonth = (endMonth + 1) % 12;
     const year = endMonth === 11 ? endDate.getFullYear() + 1 : endDate.getFullYear();
-    const lastDate = new Date(year, nextMonth, endOfPeriodDate);
+    const EndOfPeriodDate = new Date(year, nextMonth, endOfPeriodDate);
     const today = new Date();
-    const diffMs = lastDate.getTime() - today.getTime();
+    const diffMs = EndOfPeriodDate.getTime() - today.getTime();
     const dayRemaining = Math.max(0, Math.floor(diffMs / (1000 * 60 * 60 * 24)) + 1);
 
     const perDay = balanceValue - (dayRemaining -1) * perDayAmount;
@@ -124,15 +124,15 @@ getWalletSummary.get('/wallets/summary', async (c) => {
       success: true,
       message: "Wallet summary retrieved successfully",
       data: {
-        wallets: walletHaveRows,
-        have: totalBalance,
+				have: totalBalance,
         mustpay,
+        dayRemaining,
         balance: balanceValue,
         perDay,
-        dayRemaining,
-        lastDate: lastDate.toISOString(),
-        mustPayItems,
+        wallets: walletHaveRows,
         delegatedWallets: delegatedWalletResults,
+        mustPayItems,
+        endPeriodDate: EndOfPeriodDate.toISOString(),
       },
     };
     return c.json(res, 200);
