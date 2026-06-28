@@ -2,6 +2,9 @@ import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { swaggerUI } from '@hono/swagger-ui';
 import { openApiDoc } from './openapi';
+import { logAction } from './routes/tracking/logging';
+import { createClient } from "@libsql/client";
+import { drizzle } from "drizzle-orm/libsql";
 import { getAuth } from './auth/auth';
 import { getAllTransactions } from "./routes/spreadsheet/getAllTransactions";
 import { lastTransaction } from "./routes/spreadsheet/lastTransaction";
@@ -170,6 +173,47 @@ app.route("/database", addLog);
 app.route("/supabase", getPostsBySecretName);
 app.route("/supabase", createPost);
 app.route("/supabase", testSupabase);
+
+// ── Logging middleware for tracking routes ──
+app.use("/tind_tracking/*", async (c, next) => {
+  let requestPayload: any = null;
+  const ct = c.req.header("content-type");
+  if (ct && ct.includes("application/json")) {
+    try {
+      const clone = c.req.raw.clone();
+      requestPayload = await clone.json();
+    } catch {}
+  }
+
+  await next();
+
+  const method = c.req.method;
+  if (method === "GET") return;
+
+  const user = (c as any).get("user");
+  if (!user?.id) return;
+
+  const path = new URL(c.req.url).pathname;
+  const actionType = method === "POST" ? "create" as any : method === "PUT" ? "update" as any : "delete" as any;
+  const resource = path.replace("/tind_tracking/", "") || "unknown";
+  const status = (c.res as any)?.status ?? 200;
+
+  let responseBody: any = null;
+  try {
+    if (c.res) {
+      const resClone = c.res.clone();
+      responseBody = await resClone.json();
+    }
+  } catch {}
+
+  try {
+    const dbClient = createClient({ url: c.env.TURSO_DATABASE_URL, authToken: c.env.TURSO_AUTH_TOKEN });
+    const db = drizzle(dbClient);
+    await logAction(db, user.id, actionType, `${actionType} ${resource} (${status})`, requestPayload, responseBody);
+    dbClient.close();
+  } catch {}
+});
+
 app.route("/tind_tracking", transfer);
 app.route("/tind_tracking", createStandardTransaction);
 app.route("/tind_tracking", createMonthPeriod);

@@ -16,11 +16,13 @@ import { getAuthenticatedUserInfo } from '../../../auth/getAuthenticatedUser';
 
 export const createMustpayTransaction = new Hono<{ Bindings: Env }>();
 
-const schema = Type.Object({
+const itemSchema = Type.Object({
 	payWalletId: Type.String(),
 	mustpayTransactionId: Type.String(),
 	amount: Type.Number(),
+	note: Type.Optional(Type.String()),
 })
+const schema = Type.Array(itemSchema)
 
 createMustpayTransaction.post('/mustpay-transactions/pay', tbValidator('json', schema), async (c) => {
 	try {
@@ -29,61 +31,13 @@ createMustpayTransaction.post('/mustpay-transactions/pay', tbValidator('json', s
 			return c.json({ success: false, message: "Unauthorized", data: null } satisfies GenericResponseInterface, 401);
 		}
 
-		const { payWalletId, mustpayTransactionId, amount } = c.req.valid('json');
-
-		if (amount <= 0) {
-			return c.json({ success: false, message: "Amount must be positive", data: null } satisfies GenericResponseInterface, 400);
+		const items = c.req.valid('json');
+		if (items.length === 0) {
+			return c.json({ success: false, message: "At least one payment is required", data: null } satisfies GenericResponseInterface, 400);
 		}
 
 		const { db, client } = createDbClient(c.env);
 
-		// ── Validate must-pay transaction ──
-		const [mustpayTx] = await db
-			.select()
-			.from(mustPayTransactions)
-			.where(and(
-				eq(mustPayTransactions.id, mustpayTransactionId),
-				eq(mustPayTransactions.userId, user.id)
-			))
-			.limit(1);
-
-		if (!mustpayTx) {
-			client.close();
-			return c.json({ success: false, message: "Must-pay transaction not found", data: null } satisfies GenericResponseInterface, 404);
-		}
-		if (mustpayTx.userId !== user.id) {
-			client.close();
-			return c.json({ success: false, message: "Must-pay transaction does not belong to you", data: null } satisfies GenericResponseInterface, 403);
-		}
-		if (amount > mustpayTx.remainingAmount) {
-			client.close();
-			return c.json({ success: false, message: `Amount exceeds remaining amount (${mustpayTx.remainingAmount})`, data: null } satisfies GenericResponseInterface, 400);
-		}
-
-		// ── Validate pay wallet ──
-		const [wallet] = await db
-			.select()
-			.from(wallets)
-			.where(and(
-				eq(wallets.id, payWalletId),
-				eq(wallets.userId, user.id)
-			))
-			.limit(1);
-
-		if (!wallet) {
-			client.close();
-			return c.json({ success: false, message: "Wallet not found", data: null } satisfies GenericResponseInterface, 404);
-		}
-		if (wallet.userId !== user.id) {
-			client.close();
-			return c.json({ success: false, message: "Wallet does not belong to you", data: null } satisfies GenericResponseInterface, 403);
-		}
-		if (wallet.balance < amount) {
-			client.close();
-			return c.json({ success: false, message: `Insufficient balance in wallet. Required: ${amount}, Available: ${wallet.balance}`, data: null } satisfies GenericResponseInterface, 400);
-		}
-
-		// ── Look up "must_pay" transaction type ──
 		const [mustPayType] = await db
 			.select()
 			.from(transactionTypes)
@@ -98,59 +52,110 @@ createMustpayTransaction.post('/mustpay-transactions/pay', tbValidator('json', s
 			return c.json({ success: false, message: "Must-pay transaction type not found, create it first", data: null } satisfies GenericResponseInterface, 400);
 		}
 
-		// ── Create the payment transaction ──
-		const now = new Date();
-		const txId = ulid();
-		const transactionData: InsertTransaction = {
-			id: txId,
-			userId: user.id,
-			walletId: payWalletId,
-			toWalletId: null,
-			amount: -amount,
-			fee: 0,
-			currencyId: mustpayTx.currencyId,
-			date: now,
-			note: `${mustpayTx.name}`,
-			category: null,
-			monthPeriodId: mustpayTx.monthPeriodId,
-			mustPayTransactionId: mustpayTransactionId,
-			transactionTypeId: mustPayType.id,
-		};
+		const created: (typeof transactions.$inferSelect)[] = [];
+		const walletBalanceCache = new Map<string, number>();
 
-		await db.insert(transactions).values(transactionData).run();
+		for (const item of items) {
+			if (item.amount <= 0) {
+				client.close();
+				return c.json({ success: false, message: "Amount must be positive", data: null } satisfies GenericResponseInterface, 400);
+			}
 
-		// ── Update wallet balance ──
-		await db.update(wallets)
-			.set({ balance: wallet.balance - amount })
-			.where(and(
-				eq(wallets.id, payWalletId),
-				eq(wallets.userId, user.id)
-			))
-			.run();
+			const [mustpayTx] = await db
+				.select()
+				.from(mustPayTransactions)
+				.where(and(
+					eq(mustPayTransactions.id, item.mustpayTransactionId),
+					eq(mustPayTransactions.userId, user.id)
+				))
+				.limit(1);
 
-		// ── Update remaining amount on must-pay transaction ──
-		await db.update(mustPayTransactions)
-			.set({ remainingAmount: mustpayTx.remainingAmount - amount })
-			.where(and(
-				eq(mustPayTransactions.id, mustpayTransactionId),
-				eq(mustPayTransactions.userId, user.id)
-			))
-			.run();
+			if (!mustpayTx) {
+				client.close();
+				return c.json({ success: false, message: `Must-pay transaction not found: ${item.mustpayTransactionId}`, data: null } satisfies GenericResponseInterface, 404);
+			}
+			if (item.amount > mustpayTx.remainingAmount) {
+				client.close();
+				return c.json({ success: false, message: `Amount (${item.amount}) exceeds remaining (${mustpayTx.remainingAmount}) for "${mustpayTx.name}"`, data: null } satisfies GenericResponseInterface, 400);
+			}
 
-		const [created] = await db
-			.select()
-			.from(transactions)
-			.where(and(
-				eq(transactions.id, txId),
-				eq(transactions.userId, user.id)
-			))
-			.limit(1);
+			if (!walletBalanceCache.has(item.payWalletId)) {
+				const [wallet] = await db
+					.select()
+					.from(wallets)
+					.where(and(
+						eq(wallets.id, item.payWalletId),
+						eq(wallets.userId, user.id)
+					))
+					.limit(1);
+
+				if (!wallet) {
+					client.close();
+					return c.json({ success: false, message: `Wallet not found: ${item.payWalletId}`, data: null } satisfies GenericResponseInterface, 404);
+				}
+				walletBalanceCache.set(item.payWalletId, wallet.balance);
+			}
+
+			const currentBalance = walletBalanceCache.get(item.payWalletId)!;
+			if (currentBalance < item.amount) {
+				client.close();
+				return c.json({ success: false, message: `Insufficient balance in wallet ${item.payWalletId}. Required: ${item.amount}, Available: ${currentBalance}`, data: null } satisfies GenericResponseInterface, 400);
+			}
+
+			walletBalanceCache.set(item.payWalletId, currentBalance - item.amount);
+			const now = new Date();
+			const txId = ulid();
+			const transactionData: InsertTransaction = {
+				id: txId,
+				userId: user.id,
+				walletId: item.payWalletId,
+				toWalletId: null,
+				amount: -item.amount,
+				fee: 0,
+				currencyId: mustpayTx.currencyId,
+				date: now,
+				note: item.note ?? `${mustpayTx.name}`,
+				category: null,
+				monthPeriodId: mustpayTx.monthPeriodId,
+				mustPayTransactionId: item.mustpayTransactionId,
+				transactionTypeId: mustPayType.id,
+			};
+
+			await db.insert(transactions).values(transactionData).run();
+
+			await db.update(wallets)
+				.set({ balance: currentBalance - item.amount })
+				.where(and(
+					eq(wallets.id, item.payWalletId),
+					eq(wallets.userId, user.id)
+				))
+				.run();
+
+			await db.update(mustPayTransactions)
+				.set({ remainingAmount: mustpayTx.remainingAmount - item.amount })
+				.where(and(
+					eq(mustPayTransactions.id, item.mustpayTransactionId),
+					eq(mustPayTransactions.userId, user.id)
+				))
+				.run();
+
+			const [createdTx] = await db
+				.select()
+				.from(transactions)
+				.where(and(
+					eq(transactions.id, txId),
+					eq(transactions.userId, user.id)
+				))
+				.limit(1);
+
+			created.push(createdTx);
+		}
 
 		client.close();
 
 		const res: GenericResponseInterface = {
 			success: true,
-			message: `Payment of ${amount} for "${mustpayTx.name}" completed`,
+			message: `${created.length} must-pay payment(s) completed successfully`,
 			data: created,
 		};
 		return c.json(res, 200);
@@ -158,8 +163,8 @@ createMustpayTransaction.post('/mustpay-transactions/pay', tbValidator('json', s
 		const response: GenericResponseInterface = {
 			success: false,
 			message: error
-				? `Error while processing must-pay payment: ${error}${error.code ? ` - ${error.code}` : ''}`
-				: 'Error while processing must-pay payment',
+				? `Error while processing must-pay payments: ${error}${error.code ? ` - ${error.code}` : ''}`
+				: 'Error while processing must-pay payments',
 			data: null,
 		};
 		return c.json(response, 500);

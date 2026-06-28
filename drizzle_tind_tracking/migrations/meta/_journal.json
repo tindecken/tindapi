@@ -57,6 +57,13 @@
       "when": 1782529531074,
       "tag": "0007_useful_ravenous",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1782649972033,
+      "tag": "0008_romantic_giant_man",
+      "breakpoints": true
     }
   ]
 }

@@ -94,12 +94,9 @@ getWalletSummary.get('/wallets/summary', async (c) => {
     }
 
     // ── Delegated wallets ──
-    const totalTargetAmount = mustPayItems.reduce((sum, item) => sum + item.amount, 0);
     const delegatedWalletResults = delegatedWallets.map((w) => ({
       name: w.name,
-      paid: w.balance,
-      targetAmount: totalTargetAmount,
-      remaining: totalTargetAmount - w.balance,
+      balance: w.balance,
     }));
 
     client.close();

@@ -253,7 +253,8 @@ export const logs = sqliteTable("log", {
     .references(() => user.id, { onDelete: "cascade" }),
   actionType: text("action_type").$type<ActionType>().notNull(),
   message: text("message").notNull(),
-  metadata: text("metadata"),
+  payload: text("payload", { mode: "json"}),
+  response: text("response", { mode: "json"}),
   timestamp: integer("timestamp", { mode: "timestamp" }).notNull().$defaultFn(() => sql`strftime('%s', 'now')`),
 });
 

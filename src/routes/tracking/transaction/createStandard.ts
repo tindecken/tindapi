@@ -19,13 +19,13 @@ import { getAuthenticatedUserInfo } from '../../../auth/getAuthenticatedUser';
 export const createStandardTransaction = new Hono<{ Bindings: Env }>();
 const itemSchema = Type.Object({
 	walletId: Type.Optional(Type.String()),
+	delegatedWalletId: Type.Optional(Type.String()),
 	amount: Type.Number(),
 	currencyId: Type.Optional(Type.String()),
 	date: Type.Optional(Type.Number()),
 	note: Type.String(),
 	categoryId: Type.Optional(Type.String()),
 	monthPeriodId: Type.Optional(Type.String()),
-	delegatedWalletId: Type.Optional(Type.String()),
 })
 const schema = Type.Array(itemSchema)
 
@@ -169,13 +169,13 @@ createStandardTransaction.post('/transactions', tbValidator('json', schema), asy
 			await db.insert(transactions).values(transactionData).run();
 
 			await db.update(wallets)
-				.set({ balance: wallet.balance + item.amount })
+				.set({ balance: wallet.balance - item.amount })
 				.where(eq(wallets.id, resolvedPayWalletId))
 				.run();
 
 			if (delegatedWallet) {
 				await db.update(wallets)
-					.set({ balance: delegatedWallet.balance + item.amount })
+					.set({ balance: delegatedWallet.balance - item.amount })
 					.where(eq(wallets.id, delegatedWallet.id))
 					.run();
 			}
