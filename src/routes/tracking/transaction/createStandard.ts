@@ -25,6 +25,7 @@ const itemSchema = Type.Object({
 	note: Type.String(),
 	categoryId: Type.Optional(Type.String()),
 	monthPeriodId: Type.Optional(Type.String()),
+	delegatedWalletId: Type.Optional(Type.String()),
 })
 const schema = Type.Array(itemSchema)
 
@@ -126,13 +127,34 @@ createStandardTransaction.post('/transactions', tbValidator('json', schema), asy
 			const resolvedCategory = item.categoryId ?? uncategorized?.id ?? null;
 			const resolvedDate = item.date ? new Date(item.date) : new Date();
 
+			let delegatedWallet: typeof wallets.$inferSelect | null = null;
+			if (item.delegatedWalletId) {
+				[delegatedWallet] = await db
+					.select()
+					.from(wallets)
+					.where(eq(wallets.id, item.delegatedWalletId))
+					.limit(1);
+
+				if (!delegatedWallet) {
+					client.close();
+					return c.json({ success: false, message: "Delegated wallet not found", data: null } satisfies GenericResponseInterface, 404);
+				}
+				if (delegatedWallet.userId !== user.id) {
+					client.close();
+					return c.json({ success: false, message: "Delegated wallet does not belong to you", data: null } satisfies GenericResponseInterface, 403);
+				}
+				if (!delegatedWallet.isDelegated) {
+					client.close();
+					return c.json({ success: false, message: "Wallet is not a delegated wallet", data: null } satisfies GenericResponseInterface, 400);
+				}
+			}
+
 			const id = ulid();
-			const amount = wallet.isDelegated ? -item.amount : item.amount;
 			const transactionData: InsertTransaction = {
 				id,
 				userId: user.id,
 				walletId: resolvedPayWalletId,
-				amount,
+				amount: item.amount,
 				fee: 0,
 				currencyId: resolvedCurrencyId,
 				date: resolvedDate,
@@ -141,15 +163,22 @@ createStandardTransaction.post('/transactions', tbValidator('json', schema), asy
 				monthPeriodId: resolvedMonthPeriodId,
 				mustPayTransactionId: null,
 				transactionTypeId: standardType.id,
-				toWalletId: null,
+				toWalletId: item.delegatedWalletId ?? null,
 			};
 
 			await db.insert(transactions).values(transactionData).run();
 
 			await db.update(wallets)
-				.set({ balance: wallet.isDelegated ? wallet.balance - item.amount : wallet.balance + item.amount })
+				.set({ balance: wallet.balance + item.amount })
 				.where(eq(wallets.id, resolvedPayWalletId))
 				.run();
+
+			if (delegatedWallet) {
+				await db.update(wallets)
+					.set({ balance: delegatedWallet.balance + item.amount })
+					.where(eq(wallets.id, delegatedWallet.id))
+					.run();
+			}
 
 			const [createdTx] = await db
 				.select()

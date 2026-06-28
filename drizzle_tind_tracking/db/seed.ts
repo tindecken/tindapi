@@ -168,11 +168,11 @@ async function seed() {
 	const walletId5 = "01KW262KJMQTZP3ND6Q04SPAMW";
 	const walletId6 = "01KW262KJMJPCJBGBD5RGAC4KT";
   const walletRows = [
-    { id: walletId1, userId: user1ID, name: "ATM", isDefault: true, isDelegated: false, balance: 72750 },
-    { id: walletId2, userId: user1ID, name: "Cash", isDefault: false, isDelegated: false, balance: 734 },
+    { id: walletId1, userId: user1ID, name: "ATM", isDefault: true, isDelegated: false, balance: 0 },
+    { id: walletId2, userId: user1ID, name: "Cash", isDefault: false, isDelegated: false, balance: 0 },
     { id: walletId3, userId: user1ID, name: "HSBC", isDefault: false, isDelegated: false, balance: 0 },
-    { id: walletId4, userId: user1ID, name: "Momo", isDefault: false, isDelegated: false, balance: 26044 },
-		{ id: walletId5, userId: user1ID, name: "Saving (Momo)", isDefault: false, isDelegated: false, isSaving: true, balance: 14500 },
+    { id: walletId4, userId: user1ID, name: "Momo", isDefault: false, isDelegated: false, balance: 0 },
+		{ id: walletId5, userId: user1ID, name: "Saving (Momo)", isDefault: false, isDelegated: false, isSaving: true, balance: 0 },
     { id: walletId6, userId: user1ID, name: "Nhi", isDefault: false, isDelegated: true, balance: 0 },
   ];
   await db.insert(wallets).values(walletRows).run();

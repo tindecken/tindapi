@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import type { GenericResponseInterface } from '../../../models/GenericResponseInterface';
-import { eq, and, desc, ne } from "drizzle-orm";
+import { eq, and, desc, ne, inArray } from "drizzle-orm";
 import { wallets, mustPayTransactions, monthPeriods, settings } from "../../../../drizzle_tind_tracking/db/schema";
 import { createDbClient } from "../../../../drizzle_tind_tracking/db/dbClient";
 import { getAuthenticatedUserInfo } from "../../../auth/getAuthenticatedUser";
@@ -16,7 +16,7 @@ getWalletSummary.get('/wallets/summary', async (c) => {
 
     const { db, client } = createDbClient(c.env);
 
-    const [walletRows, activePeriod, settingsRows, delegatedWallets] = await Promise.all([
+    const [walletHaveRows, activePeriod, settingsRows, delegatedWallets] = await Promise.all([
       db
         .select({
           name: wallets.name,
@@ -71,7 +71,7 @@ getWalletSummary.get('/wallets/summary', async (c) => {
       return c.json({ success: false, message: "Settings not found: PerDayAmount and EndOfPeriodDate are required", data: null } satisfies GenericResponseInterface, 400);
     }
 
-    const totalBalance = walletRows.reduce((sum, row) => sum + row.balance, 0);
+    const totalBalance = walletHaveRows.reduce((sum, row) => sum + row.balance, 0);
 
     let mustPayItems: { name: string; amount: number }[] = [];
     if (activePeriod) {
@@ -104,7 +104,9 @@ getWalletSummary.get('/wallets/summary', async (c) => {
 
     client.close();
 
-    const mustpay = mustPayItems.reduce((sum, item) => sum + item.amount, 0);
+    const totalMustPayBalance = mustPayItems.reduce((sum, item) => sum + item.amount, 0);
+    const totalDelegatedBalance = delegatedWallets.reduce((sum, w) => sum + w.balance, 0);
+    const mustpay = totalMustPayBalance + totalDelegatedBalance;
     const balanceValue = totalBalance - mustpay;
 
     const perDayAmount = parseFloat(perDaySetting.value ?? "0");
@@ -125,7 +127,7 @@ getWalletSummary.get('/wallets/summary', async (c) => {
       success: true,
       message: "Wallet summary retrieved successfully",
       data: {
-        wallets: walletRows,
+        wallets: walletHaveRows,
         have: totalBalance,
         mustpay,
         balance: balanceValue,
