@@ -7,6 +7,7 @@ import {
 	wallets,
 	transactions,
 	mustPayTransactions,
+	transactionTypes,
 } from '../../../../drizzle_tind_tracking/db/schema';
 import { createDbClient } from '../../../../drizzle_tind_tracking/db/dbClient';
 import { getAuthenticatedUserInfo } from '../../../auth/getAuthenticatedUser';
@@ -30,6 +31,24 @@ undoTransactions.post('/transactions/undo', tbValidator('json', schema), async (
 		}
 
 		const { db, client } = createDbClient(c.env);
+
+		const [standardType] = await db
+			.select({ id: transactionTypes.id })
+			.from(transactionTypes)
+			.where(eq(transactionTypes.name, "standard"))
+			.limit(1);
+
+		const [transferType] = await db
+			.select({ id: transactionTypes.id })
+			.from(transactionTypes)
+			.where(eq(transactionTypes.name, "transfer"))
+			.limit(1);
+
+		const [mustPayType] = await db
+			.select({ id: transactionTypes.id })
+			.from(transactionTypes)
+			.where(eq(transactionTypes.name, "must_pay"))
+			.limit(1);
 
 		const walletBalanceCache = new Map<string, number>();
 
@@ -67,7 +86,11 @@ undoTransactions.post('/transactions/undo', tbValidator('json', schema), async (
 				}
 			}
 
-			if (tx.toWalletId) {
+			const isTransfer = transferType && tx.transactionTypeId === transferType.id;
+			const isStandardDelegated = standardType && tx.transactionTypeId === standardType.id && tx.toWalletId;
+			const isMustPay = mustPayType && tx.transactionTypeId === mustPayType.id;
+
+			if (isTransfer) {
 				const sourceBalance = (walletBalanceCache.get(tx.walletId) ?? 0) + tx.amount + (tx.fee ?? 0);
 				walletBalanceCache.set(tx.walletId, sourceBalance);
 
@@ -76,15 +99,39 @@ undoTransactions.post('/transactions/undo', tbValidator('json', schema), async (
 					.where(eq(wallets.id, tx.walletId))
 					.run();
 
-				const destBalance = (walletBalanceCache.get(tx.toWalletId) ?? 0) - tx.amount;
-				walletBalanceCache.set(tx.toWalletId, destBalance);
+				const destBalance = (walletBalanceCache.get(tx.toWalletId!) ?? 0) - tx.amount;
+				walletBalanceCache.set(tx.toWalletId!, destBalance);
 
 				await db.update(wallets)
 					.set({ balance: destBalance })
 					.where(eq(wallets.id, tx.toWalletId!))
 					.run();
-			} else {
+			} else if (isStandardDelegated) {
+				const sourceBalance = (walletBalanceCache.get(tx.walletId) ?? 0) + tx.amount;
+				walletBalanceCache.set(tx.walletId, sourceBalance);
+
+				await db.update(wallets)
+					.set({ balance: sourceBalance })
+					.where(eq(wallets.id, tx.walletId))
+					.run();
+
+				const destBalance = (walletBalanceCache.get(tx.toWalletId!) ?? 0) + tx.amount;
+				walletBalanceCache.set(tx.toWalletId!, destBalance);
+
+				await db.update(wallets)
+					.set({ balance: destBalance })
+					.where(eq(wallets.id, tx.toWalletId!))
+					.run();
+			} else if (isMustPay) {
 				const newBalance = (walletBalanceCache.get(tx.walletId) ?? 0) - tx.amount;
+				walletBalanceCache.set(tx.walletId, newBalance);
+
+				await db.update(wallets)
+					.set({ balance: newBalance })
+					.where(eq(wallets.id, tx.walletId))
+					.run();
+			} else {
+				const newBalance = (walletBalanceCache.get(tx.walletId) ?? 0) + tx.amount;
 				walletBalanceCache.set(tx.walletId, newBalance);
 
 				await db.update(wallets)
