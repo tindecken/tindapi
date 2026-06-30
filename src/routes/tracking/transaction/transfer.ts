@@ -130,8 +130,17 @@ transfer.post('/transfer', tbValidator('json', schema), async (c) => {
         data: null
       } satisfies GenericResponseInterface, 400);
     }
+    if (toWallet.isDelegated && toWallet.balance < amount) {
+      return c.json({
+        success: false,
+        message: `Insufficient balance in delegated destination wallet. Required: ${amount}, Available: ${toWallet.balance}`,
+        data: null
+      } satisfies GenericResponseInterface, 400);
+    }
     const fromNewBalance = fromWallet.balance - totalDeduction;
-    const toNewBalance = toWallet.balance + amount;
+    const toNewBalance = toWallet.isDelegated
+      ? toWallet.balance - amount
+      : toWallet.balance + amount;
 
     // ----------------------------------------------------------------
     // Create transaction record
@@ -146,7 +155,7 @@ transfer.post('/transfer', tbValidator('json', schema), async (c) => {
 		}
 		const txId = ulid();
 		const transactionData: InsertTransaction = {
-			id: ulid(),
+			id: txId,
 			userId: user.id,
       transactionTypeId: transferTransactionType.id,
       walletId: fromWalletId,

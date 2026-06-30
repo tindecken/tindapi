@@ -51,6 +51,7 @@ undoTransactions.post('/transactions/undo', tbValidator('json', schema), async (
 			.limit(1);
 
 		const walletBalanceCache = new Map<string, number>();
+		const walletDelegatedCache = new Map<string, boolean>();
 
 		for (const item of items) {
 			const [tx] = await db
@@ -72,6 +73,7 @@ undoTransactions.post('/transactions/undo', tbValidator('json', schema), async (
 					.limit(1);
 				if (wallet) {
 					walletBalanceCache.set(tx.walletId, wallet.balance);
+					walletDelegatedCache.set(tx.walletId, wallet.isDelegated);
 				}
 			}
 
@@ -83,6 +85,7 @@ undoTransactions.post('/transactions/undo', tbValidator('json', schema), async (
 					.limit(1);
 				if (destWallet) {
 					walletBalanceCache.set(tx.toWalletId, destWallet.balance);
+					walletDelegatedCache.set(tx.toWalletId, destWallet.isDelegated);
 				}
 			}
 
@@ -99,7 +102,10 @@ undoTransactions.post('/transactions/undo', tbValidator('json', schema), async (
 					.where(eq(wallets.id, tx.walletId))
 					.run();
 
-				const destBalance = (walletBalanceCache.get(tx.toWalletId!) ?? 0) - tx.amount;
+				const destIsDelegated = walletDelegatedCache.get(tx.toWalletId!) ?? false;
+				const destBalance = destIsDelegated
+					? (walletBalanceCache.get(tx.toWalletId!) ?? 0) + tx.amount
+					: (walletBalanceCache.get(tx.toWalletId!) ?? 0) - tx.amount;
 				walletBalanceCache.set(tx.toWalletId!, destBalance);
 
 				await db.update(wallets)
