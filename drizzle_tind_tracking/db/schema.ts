@@ -255,6 +255,8 @@ export const logs = sqliteTable("log", {
   message: text("message").notNull(),
   payload: text("payload", { mode: "json"}),
   response: text("response", { mode: "json"}),
+  beforeWallets: text("before_wallets", { mode: "json" }),
+  afterWallets: text("after_wallets", { mode: "json" }),
   timestamp: integer("timestamp", { mode: "timestamp" }).notNull().$defaultFn(() => sql`strftime('%s', 'now')`),
 });
 
