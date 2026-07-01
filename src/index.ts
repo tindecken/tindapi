@@ -52,6 +52,8 @@ import { update as updateRate } from './routes/tracking/rate/update';
 import { del as deleteRate } from './routes/tracking/rate/delete';
 import { get as getLatestRate } from './routes/tracking/rate/getLatestRateOfCurrencyPair';
 import { create as createMustPayTransaction } from './routes/tracking/mustpaytransaction/create';
+import { exportData } from './routes/tracking/data/export';
+import { importData } from './routes/tracking/data/import';
 
 type Variables = {
   user: {
@@ -244,5 +246,7 @@ app.route("/tind_tracking", getCategories);
 app.route("/tind_tracking", updateCategory);
 app.route("/tind_tracking", deleteCategory);
 app.route("/tind_tracking", createMustPayTransaction);
+app.route("/tind_tracking", exportData);
+app.route("/tind_tracking", importData);
 
 export default app;
