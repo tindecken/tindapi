@@ -139,16 +139,17 @@ export const openApiDoc = {
         properties: {
           walletId: { type: 'string', description: 'Defaults to user default wallet' },
           delegatedWalletId: { type: 'string', description: 'If set, amount is also deducted from this wallet' },
-          amount: { type: 'number', description: 'Positive = expense, negative = income', example: 50000 },
+          amount: { type: 'number', description: 'Positive = expense, negative = income. Must be positive for must-pay payments.', example: 50000 },
           currencyId: { type: 'string', description: 'Defaults to default currency' },
           date: { type: 'number', description: 'Unix timestamp in ms (defaults to now)' },
           note: { type: 'string', example: 'Lunch' },
           categoryId: { type: 'string', description: 'Defaults to Uncategorized' },
           monthPeriodId: { type: 'string', description: 'Defaults to active period' },
+          mustPayTransactionId: { type: 'string', description: 'If provided, triggers must-pay payment logic: amount stored as negative, remainingAmount updated, wallet balance checked' },
         },
         required: ['amount', 'note'],
       },
-      CreateStandardTransactionRequest: {
+      CreateTransactionRequest: {
         type: 'array',
         items: { $ref: '#/components/schemas/StandardTransactionItem' },
       },
@@ -416,10 +417,10 @@ export const openApiDoc = {
     '/tind_tracking/transactions': {
       post: {
         tags: ['Transactions'],
-        summary: 'Create standard transactions (expenses/income). Send an array of items.',
+        summary: 'Create transactions (expenses/income/must-pay). Send an array of items. If mustPayTransactionId is provided, acts as a must-pay payment (amount must be positive, stored as negative, updates remainingAmount).',
         requestBody: {
           required: true,
-          content: { 'application/json': { schema: { $ref: '#/components/schemas/CreateStandardTransactionRequest' } } },
+          content: { 'application/json': { schema: { $ref: '#/components/schemas/CreateTransactionRequest' } } },
         },
         responses: {
           '200': { description: 'Array of created transaction objects' },
@@ -462,7 +463,7 @@ export const openApiDoc = {
     '/tind_tracking/mustpay-transactions/pay': {
       post: {
         tags: ['Transactions'],
-        summary: 'Pay towards must-pay transaction(s). Send an array of payments.',
+        summary: 'Pay towards must-pay transaction(s). Send an array of payments. (DEPRECATED — use POST /transactions with mustPayTransactionId instead)',
         requestBody: {
           required: true,
           content: { 'application/json': { schema: { $ref: '#/components/schemas/PayMustpayRequest' } } },
