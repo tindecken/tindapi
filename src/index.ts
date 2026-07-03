@@ -25,6 +25,7 @@ import { getPostsBySecretName } from "./routes/supabase/getPostsBySecretName";
 import { createPost } from "./routes/supabase/createPost";
 import { testSupabase } from './routes/supabase/testSupabase';
 import { transfer } from './routes/tracking/transaction/transfer';
+import { getTransactions } from "./routes/tracking/transaction/get";
 import { createStandardTransaction } from './routes/tracking/transaction/createStandard';
 import { create as createMonthPeriod } from './routes/tracking/monthperiod/create';
 import { get as getMonthPeriod } from './routes/tracking/monthperiod/get';
@@ -219,6 +220,7 @@ app.use("/tind_tracking/*", async (c, next) => {
 });
 
 app.route("/tind_tracking", transfer);
+app.route("/tind_tracking", getTransactions);
 app.route("/tind_tracking", createStandardTransaction);
 app.route("/tind_tracking", createMonthPeriod);
 app.route("/tind_tracking", getMonthPeriod);
