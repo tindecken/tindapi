@@ -72,6 +72,7 @@ getWalletSummary.get('/wallets/summary', async (c) => {
     }
 
     const totalBalance = walletHaveRows.reduce((sum, row) => sum + row.balance, 0);
+		console.log('totalbalance:', totalBalance)
 
     let mustPayItems: { name: string; amount: number }[] = [];
     if (activePeriod) {
@@ -102,7 +103,9 @@ getWalletSummary.get('/wallets/summary', async (c) => {
     client.close();
 
     const totalMustPayBalance = mustPayItems.reduce((sum, item) => sum + item.amount, 0);
+		console.log('totalMustPayBalance', totalMustPayBalance)
     const totalDelegatedBalance = delegatedWallets.reduce((sum, w) => sum + w.balance, 0);
+		console.log('totalDelegatedBalance', totalDelegatedBalance)
     const mustpay = totalMustPayBalance + totalDelegatedBalance;
     const balanceValue = totalBalance - mustpay;
 

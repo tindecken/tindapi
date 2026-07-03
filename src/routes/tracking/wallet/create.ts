@@ -2,7 +2,7 @@ import { Hono } from 'hono';
 import Type from 'typebox';
 import type { GenericResponseInterface } from '../../../models/GenericResponseInterface';
 import { tbValidator } from '@hono/typebox-validator';
-import { eq } from 'drizzle-orm';
+import { eq, and, sql } from 'drizzle-orm';
 import { ulid } from 'ulid';
 import { wallets } from '../../../../drizzle_tind_tracking/db/schema';
 import { createDbClient } from '../../../../drizzle_tind_tracking/db/dbClient';
@@ -15,6 +15,7 @@ const schema = Type.Object({
 	isDefault: Type.Optional(Type.Boolean()),
 	isDelegated: Type.Optional(Type.Boolean()),
 	isSaving: Type.Optional(Type.Boolean()),
+	balance: Type.Optional(Type.Number()),
 })
 
 createWallet.post('/wallets', tbValidator('json', schema), async (c) => {
@@ -24,7 +25,7 @@ createWallet.post('/wallets', tbValidator('json', schema), async (c) => {
 			return c.json({ success: false, message: "Unauthorized", data: null } satisfies GenericResponseInterface, 401);
 		}
 
-		const { name, isDefault, isDelegated, isSaving } = c.req.valid('json');
+		const { name, isDefault, isDelegated, isSaving, balance } = c.req.valid('json');
 
 		if (!name.trim()) {
 			return c.json({ success: false, message: "Name is required", data: null } satisfies GenericResponseInterface, 400);
@@ -32,15 +33,30 @@ createWallet.post('/wallets', tbValidator('json', schema), async (c) => {
 
 		const { db, client } = createDbClient(c.env);
 
+		const trimmedName = name.trim();
+		const [duplicate] = await db
+			.select()
+			.from(wallets)
+			.where(and(
+				sql`LOWER(${wallets.name}) = LOWER(${trimmedName})`,
+				eq(wallets.userId, user.id)
+			))
+			.limit(1);
+
+		if (duplicate) {
+			client.close();
+			return c.json({ success: false, message: "Wallet with this name already exists", data: null } satisfies GenericResponseInterface, 400);
+		}
+
 		const id = ulid();
 		const walletData = {
 			id,
 			userId: user.id,
-			name: name.trim(),
+			name: trimmedName,
 			isDefault: isDefault ?? false,
 			isDelegated: isDelegated ?? false,
 			isSaving: isSaving ?? false,
-			balance: 0,
+			balance: balance ?? 0,
 		};
 
 		await db.insert(wallets).values(walletData).run();
