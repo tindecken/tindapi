@@ -5,6 +5,8 @@ import { openApiDoc } from './openapi';
 import { logAction } from './routes/tracking/logging';
 import { createClient } from "@libsql/client";
 import { drizzle } from "drizzle-orm/libsql";
+import { eq } from "drizzle-orm";
+import { wallets } from "../drizzle_tind_tracking/db/schema";
 import { getAuth } from './auth/auth';
 import { getAllTransactions } from "./routes/spreadsheet/getAllTransactions";
 import { lastTransaction } from "./routes/spreadsheet/lastTransaction";
@@ -190,12 +192,24 @@ app.use("/tind_tracking/*", async (c, next) => {
     } catch {}
   }
 
+  const user = (c as any).get("user") as { id: string } | null;
+
+  let beforeWallets: Record<string, number> | null = null;
+  if (user?.id) {
+    try {
+      const dbClient = createClient({ url: c.env.TURSO_DATABASE_URL, authToken: c.env.TURSO_AUTH_TOKEN });
+      const db = drizzle(dbClient);
+      const rows = await db.select().from(wallets).where(eq(wallets.userId, user.id));
+      beforeWallets = Object.fromEntries(rows.map((w: any) => [w.id, w.balance]));
+      dbClient.close();
+    } catch {}
+  }
+
   await next();
 
   const method = c.req.method;
   if (method === "GET") return;
 
-  const user = (c as any).get("user");
   if (!user?.id) return;
 
   const path = new URL(c.req.url).pathname;
@@ -211,10 +225,13 @@ app.use("/tind_tracking/*", async (c, next) => {
     }
   } catch {}
 
+  let afterWallets: Record<string, number> | null = null;
   try {
     const dbClient = createClient({ url: c.env.TURSO_DATABASE_URL, authToken: c.env.TURSO_AUTH_TOKEN });
     const db = drizzle(dbClient);
-    await logAction(db, user.id, actionType, `${actionType} ${resource} (${status})`, requestPayload, responseBody);
+    const rows = await db.select().from(wallets).where(eq(wallets.userId, user.id));
+    afterWallets = Object.fromEntries(rows.map((w: any) => [w.id, w.balance]));
+    await logAction(db, user.id, actionType, `${actionType} ${resource} (${status})`, requestPayload, responseBody, beforeWallets, afterWallets);
     dbClient.close();
   } catch {}
 });

@@ -7,8 +7,10 @@ export async function logAction(
   userId: string,
   actionType: ActionType,
   message: string,
-  payload?: Record<string, any>,
-  response?: Record<string, any>
+  payload?: Record<string, any> | null,
+  response?: Record<string, any> | null,
+  beforeWallets?: Record<string, number> | null,
+  afterWallets?: Record<string, number> | null,
 ) {
   await db.insert(logs).values({
     id: ulid(),
@@ -17,5 +19,7 @@ export async function logAction(
     message,
     payload: payload ?? null,
     response: response ?? null,
+    beforeWallets: beforeWallets ?? null,
+    afterWallets: afterWallets ?? null,
   }).run();
 }
