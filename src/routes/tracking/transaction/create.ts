@@ -93,6 +93,11 @@ createTransaction.post('/transactions', tbValidator('json', schema), async (c) =
 		for (const item of items) {
 			const isMustPay = item.mustPayTransactionId != null;
 
+			if (isMustPay && item.delegatedWalletId) {
+				client.close();
+				return c.json({ success: false, message: "Cannot specify both mustPayTransactionId and delegatedWalletId", data: null } satisfies GenericResponseInterface, 400);
+			}
+
 			let mustpayTx: typeof mustPayTransactions.$inferSelect | null = null;
 			let resolvedMonthPeriodId: string;
 			let resolvedCurrencyId: string;
