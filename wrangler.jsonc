@@ -54,12 +54,14 @@
 	"env": {
 		"dev": {
 			"vars": {
-				"ENVIRONMENT": "dev"
+				"ENVIRONMENT": "dev",
+				"BETTER_AUTH_URL": "http://localhost:8787"
 			}
 		},
 		"production": {
 			"vars": {
-				"ENVIRONMENT": "production"
+				"ENVIRONMENT": "production",
+				"BETTER_AUTH_URL": "https://tindapi-production.tindecken.workers.dev"
 			}
 		}
 	}

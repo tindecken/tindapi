@@ -43,6 +43,7 @@ import { createWallet } from './routes/tracking/wallet/create';
 import { updateWallet } from './routes/tracking/wallet/update';
 import { deleteWallet } from './routes/tracking/wallet/delete';
 import { undoTransactions } from './routes/tracking/transaction/undoTransaction';
+import { getTransactions } from './routes/tracking/transaction/get';
 import { create as createMustpay } from './routes/tracking/mustpaytransaction/create';
 import { get as getMustpay } from './routes/tracking/mustpaytransaction/get';
 import { update as updateMustpay } from './routes/tracking/mustpaytransaction/update';
@@ -98,6 +99,7 @@ app.use(
 				'https://10.10.0.27:1000',
 				'https://10.10.0.27:3001',
 				'https://d.tindecken.com',
+				'https://tindapi-production.tindecken.workers.dev',
 				'http://localhost:9000',
 			];
 			if (!origin) return null;
@@ -266,6 +268,7 @@ app.route('/tind_tracking', createWallet);
 app.route('/tind_tracking', updateWallet);
 app.route('/tind_tracking', deleteWallet);
 app.route('/tind_tracking', undoTransactions);
+app.route('/tind_tracking', getTransactions);
 app.route('/tind_tracking', createMustpay);
 app.route('/tind_tracking', getMustpay);
 app.route('/tind_tracking', updateMustpay);

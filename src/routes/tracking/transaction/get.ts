@@ -16,23 +16,11 @@ getTransactions.get("/transactions", async (c) => {
 
     const { db, client } = createDbClient(c.env);
 
-    const page = parseInt(c.req.query("page") ?? "1", 10);
-    const limit = parseInt(c.req.query("limit") ?? "20", 10);
-    const offset = (page - 1) * limit;
-
-    const [rows, countResult] = await Promise.all([
-      db
-        .select()
-        .from(transactions)
-        .where(eq(transactions.userId, user.id))
-        .orderBy(desc(transactions.date))
-        .limit(limit)
-        .offset(offset),
-      db
-        .select({ count: transactions.id })
-        .from(transactions)
-        .where(eq(transactions.userId, user.id))
-    ]);
+    const rows = await db
+      .select()
+      .from(transactions)
+      .where(eq(transactions.userId, user.id))
+      .orderBy(desc(transactions.id));
 
     client.close();
 
@@ -40,7 +28,7 @@ getTransactions.get("/transactions", async (c) => {
       success: true,
       message: "Transactions retrieved successfully",
       data: rows,
-      totalRecords: countResult.length,
+      totalRecords: rows.length,
     } satisfies GenericResponseInterface, 200);
   } catch (error: any) {
     return c.json({

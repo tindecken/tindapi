@@ -5,7 +5,10 @@ export const openApiDoc = {
     version: '1.0.0',
     description: 'TindAPI - Personal Finance Tracking API',
   },
-  servers: [{ url: 'http://localhost:8787' }],
+  servers: [
+    { url: 'http://localhost:8787' },
+    { url: 'https://tindapi-production.tindecken.workers.dev' },
+  ],
   components: {
     securitySchemes: {
       bearerAuth: {
