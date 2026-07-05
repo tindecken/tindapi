@@ -104,6 +104,7 @@ app.use(
 				'https://d.tindecken.com',
 				'https://tindapi-production.tindecken.workers.dev',
 				'http://localhost:9000',
+				'https://d2.tindecken.com',
 			];
 			if (!origin) return null;
 			if (allowedOrigins.includes(origin)) return origin;
