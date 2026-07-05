@@ -1,14 +1,10 @@
 import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { bearer } from 'better-auth/plugins';
-import { createClient } from '@libsql/client';
-import { drizzle } from 'drizzle-orm/libsql';
-import * as schema from '../../drizzle_tind_tracking/db/schema';
 import { expo } from '@better-auth/expo';
 import { ulid } from 'ulid';
-import { createDbClient } from '../../drizzle_tind_tracking/db/dbClient'
+import { createDbClient } from '../../drizzle_tind_tracking/db/dbClient';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 let authInstance: any = null;
 
 export function getAuth(env: Env) {
@@ -49,8 +45,8 @@ export function getAuth(env: Env) {
 			'http://localhost:3000',
 			'http://localhost:9000',
 			'https://d.tindecken.com',
-			'*',
-			'*://*',
+			'http://192.168.1.3:9000',
+			'capacitor://192.168.1.3',
 		],
 	});
 
