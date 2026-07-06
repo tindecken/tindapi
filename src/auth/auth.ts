@@ -28,6 +28,11 @@ export function getAuth(env: Env) {
 				ipAddressHeaders: ['x-forwarded-for', 'x-real-ip', 'cf-connecting-ip', 'true-client-ip'],
 				disableIpTracking: false,
 			},
+			defaultCookieAttributes: {
+				sameSite: 'none', // Allows cross-origin cookie sharing
+				secure: true, // Requires HTTPS (turn off only in local HTTP dev)
+				httpOnly: true,
+			},
 		},
 		emailAndPassword: {
 			enabled: true,
@@ -41,6 +46,7 @@ export function getAuth(env: Env) {
 		plugins: [bearer(), expo()],
 		trustedOrigins: [
 			'http://localhost:8787',
+			'http://127.0.0.1:8787',
 			'http://localhost:5173',
 			'http://localhost:3000',
 			'http://localhost:9000',
