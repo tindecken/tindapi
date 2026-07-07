@@ -52,6 +52,7 @@ export function getAuth(env: Env) {
 			'http://localhost:9000',
 			'https://d.tindecken.com',
 			'http://192.168.1.3:9000',
+			'http://192.168.1.3:8787',
 			'capacitor://192.168.1.3',
 			'https://d2.tindecken.com',
 		],
