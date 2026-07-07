@@ -10,6 +10,7 @@ module.exports = {
 
   env: {
     PATH: `${process.env.HOME}//root/.bun/bin/bun:${process.env.PATH}`, // Add "~/.bun/bin/bun" to PATH
+	PORT: 3000
   },
   error_file: 'pm2-error.log',
   out_file: 'pm2-out.log',
