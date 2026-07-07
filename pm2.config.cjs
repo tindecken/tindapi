@@ -5,12 +5,12 @@ module.exports = {
   script: "src/index.ts", // Entry point of your application
   interpreter: "/root/.bun/bin/bun", // Bun interpreter
   env_production: {
-	NODE_ENV: "production"
+	NODE_ENV: "production",
+    PORT: 3000
   },
 
   env: {
     PATH: `${process.env.HOME}//root/.bun/bin/bun:${process.env.PATH}`, // Add "~/.bun/bin/bun" to PATH
-	PORT: 3000
   },
   error_file: 'pm2-error.log',
   out_file: 'pm2-out.log',
