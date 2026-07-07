@@ -1,6 +1,17 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { swaggerUI } from '@hono/swagger-ui';
+import dotenv from 'dotenv';
+import path from 'path';
+import fs from 'fs';
+
+// Load environment variables
+const prodEnvPath = path.resolve(process.cwd(), '.env.production');
+if (process.env.NODE_ENV === 'production' || fs.existsSync(prodEnvPath)) {
+	dotenv.config({ path: prodEnvPath });
+} else {
+	dotenv.config();
+}
 import { openApiDoc } from './openapi';
 import { logAction } from './routes/tracking/logging';
 import { createClient } from '@libsql/client';
@@ -81,6 +92,13 @@ type Variables = {
 };
 
 const app = new Hono<{ Bindings: Env; Variables: Variables }>();
+
+app.use('*', async (c, next) => {
+	if (!c.env || Object.keys(c.env).length === 0) {
+		c.env = process.env as any;
+	}
+	await next();
+});
 
 app.use(
 	'*',
