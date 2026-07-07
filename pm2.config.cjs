@@ -6,7 +6,7 @@ module.exports = {
   interpreter: "/root/.bun/bin/bun", // Bun interpreter
   env_production: {
 	NODE_ENV: "production",
-    PORT: 3000
+    PORT: 3333
   },
 
   env: {
