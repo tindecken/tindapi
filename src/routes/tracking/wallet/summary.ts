@@ -112,24 +112,13 @@ getWalletSummary.get('/wallets/summary', async (c) => {
     const perDayAmount = parseFloat(perDaySetting.value ?? "0");
     const endOfPeriodDate = parseInt(endOfPeriodSetting.value ?? "0", 10);
 
-    const TZ_OFFSET_MS = 7 * 3600000;
-
     const endDate = new Date(activePeriod.endDate);
-    const endMonth = endDate.getUTCMonth();
+    const endMonth = endDate.getMonth();
     const nextMonth = (endMonth + 1) % 12;
-    const year = endMonth === 11 ? endDate.getUTCFullYear() + 1 : endDate.getUTCFullYear();
-
-    const endMidnightUtc7 = Date.UTC(year, nextMonth, endOfPeriodDate) - TZ_OFFSET_MS;
-
-    const nowUtc7 = Date.now() + TZ_OFFSET_MS;
-    const nowDateUtc7 = new Date(nowUtc7);
-    const todayMidnightUtc7 = Date.UTC(
-      nowDateUtc7.getUTCFullYear(),
-      nowDateUtc7.getUTCMonth(),
-      nowDateUtc7.getUTCDate()
-    ) - TZ_OFFSET_MS;
-
-    const diffMs = endMidnightUtc7 - todayMidnightUtc7;
+    const year = endMonth === 11 ? endDate.getFullYear() + 1 : endDate.getFullYear();
+    const EndOfPeriodDate = new Date(year, nextMonth, endOfPeriodDate);
+    const today = new Date();
+    const diffMs = EndOfPeriodDate.getTime() - today.getTime();
     const dayRemaining = Math.max(0, Math.floor(diffMs / (1000 * 60 * 60 * 24)) + 1);
 
     const perDay = balanceValue - (dayRemaining -1) * perDayAmount;
@@ -146,7 +135,7 @@ getWalletSummary.get('/wallets/summary', async (c) => {
         wallets: walletHaveRows,
         delegatedWallets: delegatedWalletResults,
         mustPayItems,
-        endPeriodDate: new Date(endMidnightUtc7).toISOString(),
+        endPeriodDate: EndOfPeriodDate.toISOString(),
       },
     };
     return c.json(res, 200);
