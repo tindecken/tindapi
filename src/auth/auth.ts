@@ -47,18 +47,19 @@ export function getAuth(env: Env) {
 		trustedOrigins: [
 			'http://localhost:8787',
 			'http://127.0.0.1:8787',
-			'http://localhost:5173',
 			'http://localhost:3000',
 			'http://localhost:9000',
 			'https://d.tindecken.com',
 			'http://192.168.1.3:9000',
+			'http://192.168.1.3:9500',
 			'capacitor://192.168.1.3',
 			'https://d2.tindecken.com',
+			'https://192.168.1.3:9500',
 		],
 		session: {
 			expiresIn: 60 * 60 * 24 * 30, // 30 days
-        	updateAge: 60 * 60 * 24 // 1 day (every 1 day the session expiration is updated)
-		}
+			updateAge: 60 * 60 * 24, // 1 day (every 1 day the session expiration is updated)
+		},
 	});
 
 	return authInstance;

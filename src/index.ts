@@ -102,6 +102,7 @@ app.use(
 				'http://192.168.1.99:9090',
 				'capacitor://192.168.1.99:9090',
 				'capacitor://192.168.1.99',
+				'capacitor://192.168.1.3',
 				'https://192.168.1.3:9090',
 				'https://192.168.1.3:9500',
 				'http://192.168.1.3:9500',
@@ -112,6 +113,7 @@ app.use(
 				'https://tindapi-production.tindecken.workers.dev',
 				'http://localhost:9000',
 				'https://d2.tindecken.com',
+				'http://192.168.1.3:9500',
 			];
 			if (!origin) return null;
 			if (allowedOrigins.includes(origin)) return origin;
