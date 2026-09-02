@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import type { GenericResponseInterface } from '../../../models/GenericResponseInterface';
-import { eq, and } from "drizzle-orm";
-import { wallets } from "../../../../drizzle_tind_tracking/db/schema";
+import { eq, and, desc } from "drizzle-orm";
+import { wallets, monthPeriods } from "../../../../drizzle_tind_tracking/db/schema";
 import { createDbClient } from "../../../../drizzle_tind_tracking/db/dbClient";
 import { getAuthenticatedUserInfo } from "../../../auth/getAuthenticatedUser";
 
@@ -16,10 +16,28 @@ getAllWallets.get('/wallets', async (c) => {
 
     const { db, client } = createDbClient(c.env);
 
+    const [activePeriod] = await db
+      .select()
+      .from(monthPeriods)
+      .where(and(
+        eq(monthPeriods.isActive, true),
+        eq(monthPeriods.userId, user.id)
+      ))
+      .orderBy(desc(monthPeriods.updatedAt))
+      .limit(1);
+
+    if (!activePeriod) {
+      client.close();
+      return c.json({ success: false, message: "No active month period found", data: null } satisfies GenericResponseInterface, 400);
+    }
+
     const rows = await db
       .select()
       .from(wallets)
-      .where(eq(wallets.userId, user.id));
+      .where(and(
+        eq(wallets.userId, user.id),
+        eq(wallets.monthPeriodId, activePeriod.id)
+      ));
 
     client.close();
 

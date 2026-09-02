@@ -87,6 +87,8 @@ export const wallets = sqliteTable("wallet", {
   isDelegated: integer("is_delegated", { mode: "boolean" }).notNull().default(false),
   isSaving: integer("is_saving", { mode: "boolean" }).notNull().default(false),
   balance: real("balance").notNull().default(0),
+  monthPeriodId: text("month_period_id")
+    .references(() => monthPeriods.id, { onDelete: "set null" }),
   createdAt: integer("created_at", {mode: "timestamp"}).notNull().$defaultFn(() => sql`strftime('%s', 'now')`),
   updatedAt: integer("updated_at", {mode: "timestamp"})
     .notNull()

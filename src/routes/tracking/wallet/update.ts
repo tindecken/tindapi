@@ -2,8 +2,8 @@ import { Hono } from 'hono';
 import Type from 'typebox';
 import type { GenericResponseInterface } from '../../../models/GenericResponseInterface';
 import { tbValidator } from '@hono/typebox-validator';
-import { eq, or, and, sql } from 'drizzle-orm';
-import { wallets, transactions } from '../../../../drizzle_tind_tracking/db/schema';
+import { eq, or, and, sql, desc } from 'drizzle-orm';
+import { wallets, transactions, monthPeriods } from '../../../../drizzle_tind_tracking/db/schema';
 import { createDbClient } from '../../../../drizzle_tind_tracking/db/dbClient';
 import { getAuthenticatedUserInfo } from '../../../auth/getAuthenticatedUser';
 
@@ -16,6 +16,7 @@ const schema = Type.Object({
 	isDelegated: Type.Optional(Type.Boolean()),
 	isSaving: Type.Optional(Type.Boolean()),
 	balance: Type.Optional(Type.Number()),
+	monthPeriodId: Type.Optional(Type.String()),
 })
 
 updateWallet.put('/wallets', tbValidator('json', schema), async (c) => {
@@ -25,7 +26,7 @@ updateWallet.put('/wallets', tbValidator('json', schema), async (c) => {
 			return c.json({ success: false, message: "Unauthorized", data: null } satisfies GenericResponseInterface, 401);
 		}
 
-		const { id, name, isDefault, isDelegated, isSaving, balance } = c.req.valid('json');
+		const { id, name, isDefault, isDelegated, isSaving, balance, monthPeriodId } = c.req.valid('json');
 
 		const { db, client } = createDbClient(c.env);
 
@@ -85,6 +86,24 @@ updateWallet.put('/wallets', tbValidator('json', schema), async (c) => {
 		if (isDelegated !== undefined) updateData.isDelegated = isDelegated;
 		if (isSaving !== undefined) updateData.isSaving = isSaving;
 		if (balance !== undefined) updateData.balance = balance;
+		if (monthPeriodId !== undefined) {
+			let resolvedMonthPeriodId = monthPeriodId;
+			if (resolvedMonthPeriodId) {
+				const [period] = await db
+					.select()
+					.from(monthPeriods)
+					.where(and(
+						eq(monthPeriods.id, resolvedMonthPeriodId),
+						eq(monthPeriods.userId, user.id)
+					))
+					.limit(1);
+				if (!period) {
+					client.close();
+					return c.json({ success: false, message: "Month period not found", data: null } satisfies GenericResponseInterface, 404);
+				}
+			}
+			updateData.monthPeriodId = resolvedMonthPeriodId;
+		}
 
 		await db.update(wallets)
 			.set(updateData)

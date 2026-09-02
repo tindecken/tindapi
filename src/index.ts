@@ -302,18 +302,20 @@ app.route('/tind_tracking', createMustPayTransaction);
 app.route('/tind_tracking', exportData);
 app.route('/tind_tracking', importData);
 
-const port = Number(process.env.PORT!);
+export default app;
 
-// Start server explicitly for production (PM2)
-const server = Bun.serve({
-	port: port,
-	fetch: app.fetch,
-});
+// const port = Number(process.env.PORT!);
 
-console.log(`🚀 Server running on port ${server.port}`);
+// // Start server explicitly for production (PM2)
+// const server = Bun.serve({
+// 	port: port,
+// 	fetch: app.fetch,
+// });
 
-// Also export for development mode
-export default {
-	port: port,
-	fetch: app.fetch,
-};
+// console.log(`🚀 Server running on port ${server.port}`);
+
+// // Also export for development mode
+// export default {
+// 	port: port,
+// 	fetch: app.fetch,
+// };

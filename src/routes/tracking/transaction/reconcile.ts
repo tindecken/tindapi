@@ -2,7 +2,7 @@ import { Hono } from 'hono';
 import Type from 'typebox';
 import type { GenericResponseInterface } from '../../../models/GenericResponseInterface';
 import { tbValidator } from '@hono/typebox-validator';
-import { eq, desc } from 'drizzle-orm';
+import { eq, and, desc } from 'drizzle-orm';
 import { ulid } from 'ulid';
 import {
   wallets,
@@ -40,7 +40,10 @@ reconcile.post('/transactions/reconcile', tbValidator('json', schema), async (c)
     const [activePeriod] = await db
       .select()
       .from(monthPeriods)
-      .where(eq(monthPeriods.isActive, true))
+      .where(and(
+        eq(monthPeriods.isActive, true),
+        eq(monthPeriods.userId, user.id)
+      ))
       .orderBy(desc(monthPeriods.updatedAt))
       .limit(1);
 
@@ -78,19 +81,20 @@ reconcile.post('/transactions/reconcile', tbValidator('json', schema), async (c)
       const [wallet] = await db
         .select()
         .from(wallets)
-        .where(eq(wallets.id, item.walletId))
+        .innerJoin(monthPeriods, eq(wallets.monthPeriodId, monthPeriods.id))
+        .where(and(
+          eq(wallets.id, item.walletId),
+          eq(wallets.userId, user.id),
+          eq(monthPeriods.isActive, true)
+        ))
         .limit(1);
 
       if (!wallet) {
         client.close();
-        return c.json({ success: false, message: `Wallet not found: ${item.walletId}`, data: null } satisfies GenericResponseInterface, 404);
-      }
-      if (wallet.userId !== user.id) {
-        client.close();
-        return c.json({ success: false, message: `Wallet "${item.walletId}" does not belong to you`, data: null } satisfies GenericResponseInterface, 403);
+        return c.json({ success: false, message: `Wallet not found or not in the active month period: ${item.walletId}`, data: null } satisfies GenericResponseInterface, 404);
       }
 
-      const diff = item.balance - wallet.balance;
+      const diff = item.balance - wallet.wallet.balance;
 
       if (diff === 0) {
         skipped.push({ walletId: item.walletId, balance: item.balance, reason: 'No change needed' });
@@ -101,7 +105,7 @@ reconcile.post('/transactions/reconcile', tbValidator('json', schema), async (c)
       const transactionData: InsertTransaction = {
         id: txId,
         userId: user.id,
-        walletId: wallet.id,
+        walletId: wallet.wallet.id,
         amount: diff,
         fee: 0,
         currencyId: defaultCurrency.id,
@@ -117,8 +121,8 @@ reconcile.post('/transactions/reconcile', tbValidator('json', schema), async (c)
       await db.insert(transactions).values(transactionData).run();
 
       await db.update(wallets)
-        .set({ balance: item.balance })
-        .where(eq(wallets.id, wallet.id))
+        .set({ balance: item.balance, monthPeriodId: activePeriod.id })
+        .where(eq(wallets.id, wallet.wallet.id))
         .run();
 
       const [createdTx] = await db
@@ -128,8 +132,8 @@ reconcile.post('/transactions/reconcile', tbValidator('json', schema), async (c)
         .limit(1);
 
       reconciled.push({
-        walletId: wallet.id,
-        previousBalance: wallet.balance,
+        walletId: wallet.wallet.id,
+        previousBalance: wallet.wallet.balance,
         newBalance: item.balance,
         diff,
         transaction: createdTx,

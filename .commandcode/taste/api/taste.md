@@ -1,0 +1,14 @@
+# api
+- For data export endpoints, return the data as a downloadable file (with Content-Disposition: attachment header) instead of returning JSON in the response body. Confidence: 0.70
+- For delete endpoints, simply remove the record without performing any balance adjustments or side-effect calculations. Confidence: 0.70
+- Validates request bodies with TypeBox schemas via @hono/typebox-validator (tbValidator) rather than manual parsing. Confidence: 0.70
+- Returns a consistent JSON envelope { success, message, data } (typed as GenericResponseInterface) for every endpoint. Confidence: 0.80
+- Verifies resource ownership before every mutation and returns 403 "does not belong to you" when the resource belongs to another user. Confidence: 0.75
+- Keeps the OpenAPI spec (`src/openapi.ts`) schemas in sync with API endpoint changes — when adding/removing/renaming request body fields, also updates the matching CreateX/UpdateX schema entries. Confidence: 0.85
+- When a new column/field is added to the schema, surveys all related read/write paths in the routes folder first, then updates them systematically (create → update → dependent routes → OpenAPI). Confidence: 0.8
+- Runs `tsc --noEmit` after multi-file schema/API edits to verify there are no type errors before declaring done. Confidence: 0.8
+- For new optional FK fields that reference user-owned resources, validates ownership (e.g., returns 404 if the referenced period doesn't belong to the user) before writing. Confidence: 0.75
+- When a new optional field can be omitted, resolves it to the active/default state for the current user rather than leaving it null (e.g., a new `monthPeriodId` field defaults to the user's active month period if not provided). Confidence: 0.7
+- Scopes tracking read/reconcile endpoints to the user's current active month period — wallets and transactions are filtered to the active period (via innerJoin on monthPeriods with isActive = true, or monthPeriodId equality) instead of returning all rows. Confidence: 0.8
+- Scopes the active month period lookup itself to the current user (eq(monthPeriods.userId, user.id)) rather than querying only by isActive = true. Confidence: 0.7
+- Prefers hand-written Drizzle migration scripts for schema changes instead of only running `drizzle-kit generate` — the migration should include the SQL file (ALTER TABLE + data backfill with the specific value), a `_journal.json` entry, and a manually updated snapshot JSON. Confidence: 0.75

@@ -1,0 +1,2 @@
+ALTER TABLE `wallet` ADD `month_period_id` text REFERENCES month_period(id) ON DELETE SET NULL;--> statement-breakpoint
+UPDATE `wallet` SET `month_period_id` = '01M1202N98G3J63H23BMFA5SR7' WHERE `month_period_id` IS NULL;

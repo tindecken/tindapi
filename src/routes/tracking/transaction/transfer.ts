@@ -174,12 +174,12 @@ transfer.post('/transfer', tbValidator('json', schema), async (c) => {
     // Update wallet balances
     // ----------------------------------------------------------------
     await db.update(wallets)
-      .set({ balance: fromNewBalance })
+      .set({ balance: fromNewBalance, monthPeriodId: resolvedMonthPeriodId })
       .where(eq(wallets.id, fromWalletId))
       .run();
 
     await db.update(wallets)
-      .set({ balance: toNewBalance })
+      .set({ balance: toNewBalance, monthPeriodId: resolvedMonthPeriodId })
       .where(eq(wallets.id, toWalletId))
       .run();
 

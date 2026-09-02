@@ -71,6 +71,13 @@
       "when": 1782883481097,
       "tag": "0009_familiar_old_lace",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "6",
+      "when": 1782885000000,
+      "tag": "0010_assign_wallet_month_period",
+      "breakpoints": true
     }
   ]
 }

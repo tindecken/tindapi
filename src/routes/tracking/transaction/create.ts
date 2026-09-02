@@ -233,13 +233,13 @@ createTransaction.post('/transactions', tbValidator('json', schema), async (c) =
 			await db.insert(transactions).values(transactionData).run();
 
 			await db.update(wallets)
-				.set({ balance: wallet.balance - item.amount })
+				.set({ balance: wallet.balance - item.amount, monthPeriodId: resolvedMonthPeriodId })
 				.where(eq(wallets.id, resolvedPayWalletId))
 				.run();
 
 			if (delegatedWallet) {
 				await db.update(wallets)
-					.set({ balance: delegatedWallet.balance - item.amount })
+					.set({ balance: delegatedWallet.balance - item.amount, monthPeriodId: resolvedMonthPeriodId })
 					.where(eq(wallets.id, delegatedWallet.id))
 					.run();
 			}
