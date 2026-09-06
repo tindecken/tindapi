@@ -54,9 +54,11 @@ getWalletSummary.get('/wallets/summary', async (c) => {
           balance: wallets.balance,
         })
         .from(wallets)
+        .innerJoin(monthPeriods, eq(wallets.monthPeriodId, monthPeriods.id))
         .where(and(
           eq(wallets.userId, user.id),
-          eq(wallets.isDelegated, true)
+          eq(wallets.isDelegated, true),
+          eq(monthPeriods.isActive, true)
         )),
     ]);
 
