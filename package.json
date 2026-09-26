@@ -15,24 +15,24 @@
 	},
 	"devDependencies": {
 		"@cloudflare/vitest-pool-workers": "^0.12.21",
-		"@types/bun": "^1.4.1",
-		"@types/node": "^25.9.5",
-		"drizzle-kit": "^0.31.10",
+		"@types/bun": "^1.4.2",
+		"@types/node": "^25.9.8",
+		"drizzle-kit": "^0.31.11",
 		"typescript": "^5.9.3",
 		"vitest": "~3.2.7",
-		"wrangler": "^4.129.0"
+		"wrangler": "^4.141.0"
 	},
 	"dependencies": {
-		"@better-auth/expo": "^1.7.3",
+		"@better-auth/expo": "^1.7.6",
 		"@hono/swagger-ui": "^0.6.1",
 		"@hono/typebox-validator": "^1.1.0",
 		"@libsql/client": "^0.17.4",
-		"@supabase/supabase-js": "^2.115.0",
-		"better-auth": "^1.7.3",
+		"@supabase/supabase-js": "^2.117.2",
+		"better-auth": "^1.7.6",
 		"dotenv": "^17.4.2",
-		"drizzle-orm": "^0.45.2",
+		"drizzle-orm": "^0.45.3",
 		"googleapis": "^171.4.0",
-		"hono": "^4.13.7",
+		"hono": "^4.13.9",
 		"postgres": "^3.4.9",
 		"ulid": "^3.0.2"
 	}
