@@ -131,7 +131,9 @@ transfer.post('/transfer', tbValidator('json', schema), async (c) => {
       } satisfies GenericResponseInterface, 400);
     }
     const fromNewBalance = fromWallet.balance - totalDeduction;
-    const toNewBalance = toWallet.balance + amount;
+    const toNewBalance = toWallet.isDelegated
+      ? toWallet.balance - amount
+      : toWallet.balance + amount;
 
     // ----------------------------------------------------------------
     // Create transaction record
