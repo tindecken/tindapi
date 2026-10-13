@@ -50,6 +50,7 @@ export function getAuth(env: Env) {
 			'exp://**',                 // Trust all Expo development URLs
 			'exp://192.168.*.*:*/**', // Trust all local network Expo development URLs'
 			'http://localhost:8787',
+			'http://localhost:8081',
 			'http://127.0.0.1:8787',
 			'http://localhost:3000',
 			'http://localhost:9000',
