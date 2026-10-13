@@ -46,7 +46,7 @@ export function getAuth(env: Env) {
 		plugins: [bearer(), expo()],
 		trustedOrigins: [
 			'https://d2.tindecken.com', // Your frontend domain
-			'tindapp://',                 // Production custom scheme for mobile app
+			'tindtrackingapp://',                 // Production custom scheme for mobile app
 			'exp://**',                 // Trust all Expo development URLs
 			'exp://192.168.*.*:*/**', // Trust all local network Expo development URLs'
 			'http://localhost:8787',
