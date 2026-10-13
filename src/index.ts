@@ -115,6 +115,7 @@ app.use(
 				'http://localhost:9000',
 				'https://d2.tindecken.com',
 				'http://192.168.1.3:9500',
+				'http://localhost:8081',
 			];
 			if (!origin) return null;
 			if (allowedOrigins.includes(origin)) return origin;
