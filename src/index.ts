@@ -180,69 +180,69 @@ app.route('/supabase', getPostsBySecretName);
 app.route('/supabase', createPost);
 app.route('/supabase', testSupabase);
 
-// ── Logging middleware for tracking routes ──
-app.use('/tind_tracking/*', async (c, next) => {
-	let requestPayload: any = null;
-	const ct = c.req.header('content-type');
-	if (ct && ct.includes('application/json')) {
-		try {
-			const clone = c.req.raw.clone();
-			requestPayload = await clone.json();
-		} catch {}
-	}
+// // ── Logging middleware for tracking routes ──
+// app.use('/tind_tracking/*', async (c, next) => {
+// 	let requestPayload: any = null;
+// 	const ct = c.req.header('content-type');
+// 	if (ct && ct.includes('application/json')) {
+// 		try {
+// 			const clone = c.req.raw.clone();
+// 			requestPayload = await clone.json();
+// 		} catch {}
+// 	}
 
-	const user = (c as any).get('user') as { id: string } | null;
+// 	const user = (c as any).get('user') as { id: string } | null;
 
-	let beforeWallets: Record<string, number> | null = null;
-	if (user?.id) {
-		try {
-			const dbClient = createClient({ url: c.env.TURSO_DATABASE_URL, authToken: c.env.TURSO_AUTH_TOKEN });
-			const db = drizzle(dbClient);
-			const rows = await db.select().from(wallets).where(eq(wallets.userId, user.id));
-			beforeWallets = Object.fromEntries(rows.map((w: any) => [w.id, w.balance]));
-			dbClient.close();
-		} catch {}
-	}
+// 	let beforeWallets: Record<string, number> | null = null;
+// 	if (user?.id) {
+// 		try {
+// 			const dbClient = createClient({ url: c.env.TURSO_DATABASE_URL, authToken: c.env.TURSO_AUTH_TOKEN });
+// 			const db = drizzle(dbClient);
+// 			const rows = await db.select().from(wallets).where(eq(wallets.userId, user.id));
+// 			beforeWallets = Object.fromEntries(rows.map((w: any) => [w.id, w.balance]));
+// 			dbClient.close();
+// 		} catch {}
+// 	}
 
-	await next();
+// 	await next();
 
-	const method = c.req.method;
-	if (method === 'GET') return;
+// 	const method = c.req.method;
+// 	if (method === 'GET') return;
 
-	if (!user?.id) return;
+// 	if (!user?.id) return;
 
-	const path = new URL(c.req.url).pathname;
-	const actionType = method === 'POST' ? ('create' as any) : method === 'PUT' ? ('update' as any) : ('delete' as any);
-	const resource = path.replace('/tind_tracking/', '') || 'unknown';
-	const status = (c.res as any)?.status ?? 200;
+// 	const path = new URL(c.req.url).pathname;
+// 	const actionType = method === 'POST' ? ('create' as any) : method === 'PUT' ? ('update' as any) : ('delete' as any);
+// 	const resource = path.replace('/tind_tracking/', '') || 'unknown';
+// 	const status = (c.res as any)?.status ?? 200;
 
-	let responseBody: any = null;
-	try {
-		if (c.res) {
-			const resClone = c.res.clone();
-			responseBody = await resClone.json();
-		}
-	} catch {}
+// 	let responseBody: any = null;
+// 	try {
+// 		if (c.res) {
+// 			const resClone = c.res.clone();
+// 			responseBody = await resClone.json();
+// 		}
+// 	} catch {}
 
-	let afterWallets: Record<string, number> | null = null;
-	try {
-		const dbClient = createClient({ url: c.env.TURSO_DATABASE_URL, authToken: c.env.TURSO_AUTH_TOKEN });
-		const db = drizzle(dbClient);
-		const rows = await db.select().from(wallets).where(eq(wallets.userId, user.id));
-		afterWallets = Object.fromEntries(rows.map((w: any) => [w.id, w.balance]));
-		await logAction(
-			db,
-			user.id,
-			actionType,
-			`${actionType} ${resource} (${status})`,
-			requestPayload,
-			responseBody,
-			beforeWallets,
-			afterWallets,
-		);
-		dbClient.close();
-	} catch {}
-});
+// 	let afterWallets: Record<string, number> | null = null;
+// 	try {
+// 		const dbClient = createClient({ url: c.env.TURSO_DATABASE_URL, authToken: c.env.TURSO_AUTH_TOKEN });
+// 		const db = drizzle(dbClient);
+// 		const rows = await db.select().from(wallets).where(eq(wallets.userId, user.id));
+// 		afterWallets = Object.fromEntries(rows.map((w: any) => [w.id, w.balance]));
+// 		await logAction(
+// 			db,
+// 			user.id,
+// 			actionType,
+// 			`${actionType} ${resource} (${status})`,
+// 			requestPayload,
+// 			responseBody,
+// 			beforeWallets,
+// 			afterWallets,
+// 		);
+// 		dbClient.close();
+// 	} catch {}
+// });
 
 app.route('/tind_tracking', transfer);
 app.route('/tind_tracking', createTransaction);
