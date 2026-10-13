@@ -303,7 +303,6 @@ app.route('/tind_tracking', exportData);
 app.route('/tind_tracking', importData);
 
 // export default app;
-
 const port = Number(process.env.PORT!);
 
 // Start server explicitly for production (PM2)
@@ -314,8 +313,9 @@ const server = Bun.serve({
 
 console.log(`🚀 Server running on port ${server.port}`);
 
-// Also export for development mode
+/* Local development server (Bun)
 export default {
 	port: port,
 	fetch: app.fetch,
 };
+*/

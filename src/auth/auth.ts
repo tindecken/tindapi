@@ -39,12 +39,16 @@ export function getAuth(env: Env) {
 		},
 		socialProviders: {
 			google: {
-				clientId: env.GOOGLE_CLIENT_ID,
-				clientSecret: env.GOOGLE_CLIENT_SECRET,
+				clientId: env.GOOGLE_CLIENT_ID!,
+				clientSecret: env.GOOGLE_CLIENT_SECRET!,
 			},
 		},
 		plugins: [bearer(), expo()],
 		trustedOrigins: [
+			'https://d2.tindecken.com', // Your frontend domain
+			'tindapp://',                 // Production custom scheme for mobile app
+			'exp://**',                 // Trust all Expo development URLs
+			'exp://192.168.*.*:*/**', // Trust all local network Expo development URLs'
 			'http://localhost:8787',
 			'http://127.0.0.1:8787',
 			'http://localhost:3000',
@@ -53,7 +57,6 @@ export function getAuth(env: Env) {
 			'http://192.168.1.3:9000',
 			'http://192.168.1.3:9500',
 			'capacitor://192.168.1.3',
-			'https://d2.tindecken.com',
 			'https://192.168.1.3:9500',
 		],
 		session: {
